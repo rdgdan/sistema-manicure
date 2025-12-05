@@ -1,0 +1,50 @@
+/* === ARQUITETURA DE LAYOUT GLOBAL === */
+
+:root {
+  /* Cores e dimensões para fácil manutenção */
+  --sidebar-width: 260px;
+  --sidebar-width-collapsed: 88px;
+  --background-primary: #0D0D1A; /* Fundo principal da aplicação */
+}
+
+/* Remove margens e paddings padrão */
+body, #root {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden; /* Previne scrollbars no nível do body */
+  background-color: var(--background-primary);
+}
+
+/* O contentor principal que alinha a Sidebar e o conteúdo */
+.app-layout {
+  display: flex;
+  height: 100vh;
+}
+
+/* A área de conteúdo principal */
+.main-content {
+  flex-grow: 1;
+  height: 100vh; /* Ocupa a altura total da janela */
+  margin-left: var(--sidebar-width); /* Empurra o conteúdo para fora da área da sidebar */
+  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Transição suave */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* Garante que o conteúdo não transborde de forma inesperada */
+}
+
+/* Ajuste da margem quando a sidebar está colapsada */
+.main-content.collapsed {
+  margin-left: var(--sidebar-width-collapsed);
+}
+
+/* O contentor onde o React Router renderiza as páginas - AGORA COM PADDING */
+.page-container {
+  flex-grow: 1; /* Garante que a página ocupe todo o espaço disponível no main-content */
+  overflow-y: auto; /* Adiciona scroll SÓ à página se o conteúdo for maior que a tela */
+  display: flex;
+  flex-direction: column;
+  padding: 2.5rem; /* A "MOLDURA" DE ESPAÇAMENTO QUE FALTAVA */
+  box-sizing: border-box;
+}

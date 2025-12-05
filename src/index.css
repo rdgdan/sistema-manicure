@@ -1,0 +1,97 @@
+
+/* --- AURORA & PEACH CHIC THEME --- */
+
+/* --- Dark Theme (Default) --- */
+:root {
+  --background-primary: #10111A;
+  --background-secondary: #1C1D2B;
+  --card-background: rgba(28, 29, 43, 0.5);
+  --text-primary: #F0F0F5;
+  --text-secondary: #A0A0B0;
+  --border-color: rgba(94, 85, 124, 0.3);
+  --border-hover: rgba(125, 110, 169, 0.6);
+  --accent-primary: #BE93FD;
+  --accent-secondary: #E6A4B4;
+  --glow-color: rgba(190, 147, 253, 0.15);
+  --positive-color: #00D2A0;
+  --negative-color: #FF6B6B;
+}
+
+/* --- PEACH CHIC Light Theme --- */
+body[data-theme='light'] {
+  --background-primary: #FFF7F5; /* Tom de pêssego/rosé muito sutil */
+  --background-secondary: #FFFFFF;
+  --card-background: rgba(255, 255, 255, 0.75); /* Branco com transparência para o vidro */
+  --text-primary: #4A3F3F; /* Marrom escuro rico */
+  --text-secondary: #8A7F7F; /* Tom mais claro para texto secundário */
+  --border-color: #F0E5E3;
+  --border-hover: #E8D8D5;
+  --accent-primary: #A365F8; /* Roxo um pouco mais saturado para contraste */
+  --accent-secondary: #E6A4B4;
+  --glow-color: rgba(190, 147, 253, 0.15);
+  --positive-color: #009975;
+  --negative-color: #C0392B;
+}
+
+/* --- Dynamic Background Blobs --- */
+body::before, body::after {
+  content: "";
+  position: fixed;
+  z-index: -1;
+  border-radius: 50%;
+  transition: opacity 0.5s ease, background 0.5s ease;
+  filter: blur(150px); 
+}
+
+/* Dark Theme Blobs */
+body::before {
+  width: 400px; height: 400px;
+  background: var(--accent-primary);
+  opacity: 0.2;
+  top: -10%; left: -20%;
+}
+
+body::after {
+  width: 500px; height: 500px;
+  background: var(--accent-secondary);
+  opacity: 0.15;
+  bottom: -15%; right: -15%;
+}
+
+/* Light Theme Blobs */
+body[data-theme='light']::before {
+  background: #FADADD; /* Rosa pêssego suave */
+  opacity: 0.5;
+}
+
+body[data-theme='light']::after {
+  background: #DFCCFB; /* Lavanda suave */
+  opacity: 0.4;
+  bottom: -20%; right: -20%;
+}
+
+/* --- Global Styles --- */
+
+/* --- A CORREÇÃO DEFINITIVA --- */
+/* Cria um novo contexto de empilhamento para toda a aplicação. */
+/* Isso isola a aplicação dos pseudo-elementos do body com z-index negativo, */
+/* prevenindo que eles interfiram com a propagação de eventos de bibliotecas como o FullCalendar. */
+#root {
+  isolation: isolate;
+}
+
+body {
+  margin: 0;
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--background-primary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease-in-out;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-primary);
+  font-weight: 600;
+}

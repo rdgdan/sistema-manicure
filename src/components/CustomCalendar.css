@@ -1,0 +1,102 @@
+/* === AURORA BALANCED CALENDAR - FINAL ARCHITECTURE === */
+
+/* 1. O CALENDÁRIO É AGORA UM BLOCO AUTÓNOMO E CENTRADO */
+.aurora-calendar {
+  max-width: 2000px; /* AUMENTADO de 800px para melhor presença em telas grandes */
+  margin: 2rem auto; /* Centra o bloco na página com margem vertical */
+  padding: 0 1rem; /* Adiciona um respiro lateral em telas muito pequenas */
+  box-sizing: border-box; /* Garante que o padding não aumente a largura total */
+  width: 100%;
+  color: var(--text-primary);
+}
+
+/* 2. CABEÇALHO COM TÍTULO CENTRADO */
+.calendar-header {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr; /* Coluna esquerda, conteúdo, coluna direita */
+  align-items: center;
+  margin-bottom: 3rem;
+  position: relative; /* Para o caso de os botões precisarem de posicionamento absoluto se a grelha falhar */
+}
+
+.calendar-title {
+  grid-column: 2; /* Coloca o título na coluna central */
+  text-align: center;
+  font-size: 1.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.nav-buttons {
+  grid-column: 3; /* Coloca os botões na coluna da direita */
+  justify-self: end; /* Alinha os botões à direita dentro da sua coluna */
+}
+
+.nav-buttons button {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-left: 0.5rem;
+}
+
+.nav-buttons button:hover {
+  background-color: var(--accent-primary);
+  box-shadow: 0 0 15px var(--glow-color);
+}
+
+/* 3. GRELHA EQUILIBRADA COM COLUNAS FLEXÍVEIS */
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr); /* Divide a max-width em 7 colunas iguais */
+  text-align: center;
+  /* Espaçamento arejado mas contido */
+  row-gap: 2rem; 
+  column-gap: 1rem;
+}
+
+.weekday-header {
+  font-weight: 500;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  margin-bottom: 1rem;
+}
+
+.day-cell {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.day-cell.not-current-month .day-number {
+  opacity: 0.3;
+}
+
+.day-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+  font-size: 1rem;
+  transition: all 0.2s ease-in-out;
+  width: 40px;   /* Garante que o círculo tem um tamanho consistente */
+  height: 40px;  /* Garante que o círculo tem um tamanho consistente */
+  border-radius: 50%;
+}
+
+.day-cell:hover .day-number {
+  background-color: rgba(var(--accent-primary-rgb), 0.1);
+}
+
+.day-cell.today .day-number {
+  background-color: var(--accent-primary);
+  color: white;
+  font-weight: 600;
+  box-shadow: 0 0 10px var(--glow-color);
+}

@@ -1,0 +1,91 @@
+
+/* Light Theme (Default) */
+:root {
+  --primary-color: #FCE8F0;      /* Rosa Clarinho - Light Pink */
+  --accent-color: #E6A4B4;        /* Um tom de rosa um pouco mais forte para hover */
+  --background-color: #FFFFFF;    /* Branco */
+  --card-background-color: #FFFFFF; /* Branco para cards */
+  --text-color: #212529;          /* Quase Preto - Near Black for text */
+  --secondary-text-color: #495057;/* Cinza Escuro - Dark Gray for secondary text */
+  --border-color: #E9ECEF;        /* Cinza Muito Claro - Light Gray for borders */
+  --global-bg: #F8F9FA;           /* Fundo global um pouco acinzentado */
+}
+
+/* Dark Theme */
+body[data-theme='dark'] {
+  --primary-color: #FCE8F0;      /* Rosa Clarinho - Mantido */
+  --accent-color: #E6A4B4;        /* Rosa mais forte - Mantido */
+  --background-color: #1A1A1A;    /* Fundo principal escuro */
+  --card-background-color: #242424; /* Fundo dos cards um pouco mais claro */
+  --text-color: #F8F9FA;          /* Texto principal claro */
+  --secondary-text-color: #ADB5BD;/* Texto secundário acinzentado */
+  --border-color: #343A40;        /* Bordas escuras */
+  --global-bg: #121212;           /* Fundo global bem escuro */
+}
+
+
+/* Typography & Base Styles */
+body {
+  font-family: 'Poppins', sans-serif;
+  line-height: 1.6;
+  font-weight: 400;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  margin: 0;
+  
+  color: var(--text-color);
+  background-color: var(--global-bg);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+h2 {
+    font-weight: 600;
+}
+
+/* --- CORREÇÃO: Mover o contexto de empilhamento para #root --- */
+#root {
+  position: relative;
+  isolation: isolate; /* Cria um novo contexto de empilhamento sem precisar de z-index */
+  overflow-x: hidden; /* Mantém o controle de overflow aqui */
+}
+
+
+/* Floating Blobs */
+#root::before,
+#root::after {
+  content: "";
+  position: fixed;
+  z-index: -1; /* Coloca os blobs atrás do conteúdo do #root */
+  filter: blur(120px);
+  border-radius: 50%;
+  transition: opacity 0.3s ease;
+}
+
+#root::before {
+  width: 350px;
+  height: 350px;
+  background: var(--accent-color);
+  opacity: 0.7;
+  top: -50px;
+  left: -100px;
+}
+
+#root::after {
+  width: 450px;
+  height: 450px;
+  background: var(--primary-color);
+  opacity: 0.9;
+  bottom: -100px;
+  right: -150px;
+}
+
+/* Adjust blob opacity for dark mode */
+body[data-theme='dark'] #root::before {
+    opacity: 0.35;
+}
+
+body[data-theme='dark'] #root::after {
+    opacity: 0.45;
+}
