@@ -1,17 +1,18 @@
 
 import React, { useContext } from 'react';
-import './Sidebar.css';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/auth';
 import { SidebarContext } from '../context/sidebar';
-import { ThemeContext } from '../context/theme'; 
-import { FiHome, FiCalendar, FiLogOut, FiMenu, FiSun, FiMoon, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import { ThemeContext } from '../context/theme';
+import './Sidebar.css';
+// Importando o ícone `Users`
+import { Home, Calendar, Users, LogOut, ChevronLeft, ChevronRight, Sun, Moon, Sparkles } from 'lucide-react';
 
 const Sidebar = () => {
   const navigate = useNavigate();
   const { logout } = useContext(AuthContext);
-  const { isCollapsed, toggleSidebar } = useContext(SidebarContext);
   const { theme, toggleTheme } = useContext(ThemeContext);
+  const { isCollapsed, toggleSidebar } = useContext(SidebarContext);
 
   const handleLogout = () => {
     logout();
@@ -21,32 +22,41 @@ const Sidebar = () => {
   return (
     <aside className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}>
       <div className="sidebar-header">
-        <h1 className="logo-text">By Borges</h1>
+        <div className="logo-container">
+          <Sparkles className="logo-icon" />
+          <span className="logo-text">By Borges</span>
+        </div>
         <button className="toggle-btn" onClick={toggleSidebar}>
-          {isCollapsed ? <FiChevronRight /> : <FiChevronLeft />}
+          {isCollapsed ? <ChevronRight /> : <ChevronLeft />}
         </button>
       </div>
 
       <nav className="sidebar-nav">
         <NavLink to="/" className="nav-item">
-          <FiHome />
-          <span>Dashboard</span>
+          <Home size={22} />
+          <span className="nav-text">Início</span>
         </NavLink>
         <NavLink to="/agenda" className="nav-item">
-          <FiCalendar />
-          <span>Agenda</span>
+          <Calendar size={22} />
+          <span className="nav-text">Agenda</span>
+        </NavLink>
+        {/* --- LINK ADICIONADO AQUI --- */}
+        <NavLink to="/clientes" className="nav-item">
+          <Users size={22} />
+          <span className="nav-text">Clientes</span>
         </NavLink>
       </nav>
 
       <div className="sidebar-footer">
-        <button className="theme-toggle-btn" onClick={toggleTheme}>
-            {theme === 'light' ? <FiMoon /> : <FiSun />}
-            <span>{theme === 'light' ? 'Modo Escuro' : 'Modo Claro'}</span>
+        <button className="nav-item" onClick={toggleTheme}>
+          {theme === 'dark' ? <Sun size={22} /> : <Moon size={22} />}
+          <span className="nav-text">{theme === 'dark' ? 'Tema Claro' : 'Tema Escuro'}</span>
         </button>
-        <button className="logout-button" onClick={handleLogout}>
-          <FiLogOut />
-          <span>Sair</span>
+        <button className="nav-item logout" onClick={handleLogout}>
+          <LogOut size={22} />
+          <span className="nav-text">Sair</span>
         </button>
+        <p className="sidebar-signature">@nailsdesignbyborges</p>
       </div>
     </aside>
   );

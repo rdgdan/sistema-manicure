@@ -1,109 +1,33 @@
 
-/* --- Layout Geral --- */
-.main-layout {
+/* --- Estilos do Layout Principal --- */
+
+.app-layout {
   display: flex;
-  background-color: var(--background-primary);
-  min-height: 100vh;
-}
-
-/* --- Conteúdo Principal (CORRIGIDO) --- */
-.content {
-  flex-grow: 1;
-  padding: 2.5rem;
-  margin-left: 260px;
-  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  
-  /* --- A CORREÇÃO --- */
-  /* Força a criação de um novo stacking context */
-  /* Isso previne que a sidebar ou outros elementos sobreponham e "roubem" os cliques do conteúdo principal */
-  position: relative;
-  z-index: 0;
-}
-
-.main-layout.sidebar-collapsed-layout .content {
-  margin-left: 90px;
-}
-
-/* --- Estrutura da Sidebar --- */
-.sidebar {
-  width: 260px;
-  background-color: var(--background-secondary);
-  border-right: 1px solid var(--border-color);
-  display: flex;
-  flex-direction: column;
-  padding: 1.5rem;
-  position: fixed;
   height: 100vh;
-  left: 0;
-  top: 0;
-  z-index: 100;
-  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background-color: var(--background-primary);
+  overflow: hidden;
 }
 
-.sidebar-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 2.5rem;
-  flex-shrink: 0;
-}
-
-.logo-container { display: flex; align-items: center; gap: 0.8rem; overflow: hidden; }
-.logo-text { font-size: 1.5rem; font-weight: 600; color: var(--text-primary); white-space: nowrap; opacity: 1; transition: opacity 0.2s ease, max-width 0.3s ease; }
-.toggle-btn { background-color: transparent; border: 1px solid var(--border-color); color: var(--text-secondary); border-radius: 8px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s ease; flex-shrink: 0; }
-.toggle-btn svg { transition: transform 0.3s ease; }
-.toggle-btn:hover { background-color: var(--background-hover); color: var(--text-primary); }
-
-/* --- Navegação e Rodapé --- */
-.sidebar-nav {
+.main-content {
   flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 0.8rem;
-  overflow-y: auto; 
-  overflow-x: hidden;
-  min-height: 0; 
+  height: 100vh;
+  overflow-y: auto;
+  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.sidebar-footer {
-  display: flex;
-  flex-direction: column;
-  gap: 0.8rem;
-  margin-top: 1rem;
-  flex-shrink: 0;
+/* Classe para o estado EXPANDIDO - Margem aumentada para dar folga */
+.main-content.expanded {
+  margin-left: 275px; /* Valor ajustado de 260px para 275px */
 }
 
-.nav-item { display: flex; align-items: center; gap: 1rem; padding: 0.9rem 1rem; border-radius: 10px; color: var(--text-secondary); background-color: transparent; border: none; cursor: pointer; text-decoration: none; font-size: 1rem; font-weight: 500; white-space: nowrap; transition: all 0.2s ease; }
-.nav-item:hover { color: var(--text-primary); background-color: var(--background-hover); }
-.nav-item.active { background-color: var(--accent-primary); color: white; box-shadow: 0 0 15px var(--glow-color); }
-.nav-text { opacity: 1; transition: opacity 0.2s ease; }
-
-/* --- Estilo da Assinatura --- */
-.sidebar-signature {
-  text-align: center;
-  color: var(--text-secondary);
-  font-size: 0.75rem; 
-  padding: 0.5rem 0;
-  margin-top: 0.5rem;
+/* Classe para o estado RECOLHIDO */
+.main-content.collapsed {
+  margin-left: 90px; /* Largura da sidebar recolhida */
 }
 
-/* --- Estilos da Sidebar Recolhida --- */
-.sidebar.collapsed {
-  width: 90px;
-  padding: 1.5rem 1rem;
-}
-
-.sidebar.collapsed .logo-text,
-.sidebar.collapsed .nav-text {
-  opacity: 0;
-  max-width: 0;
-  pointer-events: none;
-}
-
-.sidebar.collapsed .toggle-btn svg {
-  transform: rotate(180deg);
-}
-
-.sidebar.collapsed .nav-item {
-  justify-content: center;
+.page-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2.5rem;
+  box-sizing: border-box;
 }

@@ -1,0 +1,123 @@
+
+/* --- Estilos da Página de Clientes --- */
+
+.clients-page {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem; /* Espaço entre o cabeçalho e a tabela */
+}
+
+/* --- Cabeçalho da Página --- */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.header-content h1 {
+  font-family: var(--font-serif);
+  font-size: 2.5rem;
+  margin: 0 0 0.5rem 0;
+  color: var(--text-primary);
+}
+
+.header-content p {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* --- Botão Adicionar Cliente --- */
+.add-client-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: 12px;
+  background-color: var(--accent-primary);
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2), 0 0 20px var(--glow-color);
+}
+
+.add-client-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25), 0 0 25px var(--glow-color);
+}
+
+.add-client-btn svg {
+  font-size: 1.2rem;
+}
+
+/* --- Container da Tabela --- */
+.clients-table-container {
+  background-color: var(--card-background);
+  border-radius: 12px;
+  overflow: hidden; /* Para que a borda arredondada funcione com a tabela */
+  border: 1px solid var(--border-color);
+}
+
+/* --- Tabela --- */
+.clients-table {
+  width: 100%;
+  border-collapse: collapse; /* Remove espaços entre as células */
+}
+
+.clients-table th, .clients-table td {
+  padding: 1.25rem 1.5rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.clients-table th {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  background-color: rgba(0,0,0,0.1);
+}
+
+.clients-table td {
+  font-size: 1rem;
+  color: var(--text-primary);
+}
+
+/* Remove a borda da última linha */
+.clients-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Efeito de hover nas linhas */
+.clients-table tbody tr:hover {
+  background-color: var(--background-hover);
+}
+
+/* --- Célula de Ações --- */
+.action-cell {
+  display: flex;
+  gap: 1rem;
+}
+
+.action-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: color 0.2s ease;
+  padding: 0.25rem;
+}
+
+.action-btn.edit-btn:hover {
+  color: var(--accent-primary);
+}
+
+.action-btn.delete-btn:hover {
+  color: var(--error-color);
+}

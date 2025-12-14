@@ -16,7 +16,11 @@ O objetivo deste projeto é criar um sistema de agendamento de clientes (CRM) mo
     *   Contexto de autenticação (`AuthProvider`) para gerenciar o estado do usuário de forma global e persistente.
 *   **Navegação Fluida:**
     *   **Sidebar Recolhível:** Menu lateral para navegação principal, com estado gerenciado pelo `SidebarProvider`.
-    *   **Roteamento Centralizado:** `react-router-dom` configura todas as rotas da aplicação (`/`, `/agenda`, `/login`) no componente `App.jsx`.
+    *   **Roteamento Centralizado:** `react-router-dom` configura todas as rotas da aplicação (`/`, `/agenda`, `/login`, `/clientes`) no componente `AppRoutes.jsx`.
+*   **Página de Clientes:**
+    *   Criada a página inicial para a gestão de clientes, acessível pela rota `/clientes`.
+    *   Inclui um cabeçalho e estrutura preparada para funcionalidades futuras.
+    *   Link de navegação adicionado à barra lateral com o ícone `Users`.
 
 ### **Design System ("Aurora" / "Pêssego Chic")**
 
@@ -44,11 +48,13 @@ O objetivo deste projeto é criar um sistema de agendamento de clientes (CRM) mo
 
 *   **Centralização de Provedores:** Todos os contextos da aplicação (Auth, Theme, Sidebar) foram centralizados no `App.jsx` para garantir a ordem correta de inicialização e evitar erros de escopo.
 *   **Correção de Bugs de UI/UX:** Resolvidos problemas de layout na `Sidebar`, funcionalidade dos botões (recolher/sair) e sobreposição do modal na `Agenda`.
+*   **Correção de Layout:** Resolvido bug de barra de rolagem duplicada ao centralizar a lógica de layout no `MainLayout.css` e limpar o `App.css`.
 
 ---
 
 ## Próximos Passos
 
-*   Implementar a funcionalidade de salvar, editar e excluir agendamentos no calendário.
-*   Conectar o back-end para persistir os dados de agendamentos e usuários.
-*   Desenvolver a seção de gestão de clientes.
+*   Desenvolver as funcionalidades da página de **Clientes**, como adicionar, listar, editar e visualizar clientes.
+*   Implementar a funcionalidade de salvar, editar e excluir **agendamentos** no calendário.
+*   Conectar o back-end para persistir todos os dados (clientes, agendamentos, usuários).
+

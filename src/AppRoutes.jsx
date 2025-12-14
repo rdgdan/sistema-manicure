@@ -2,34 +2,38 @@
 import React, { useContext } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthContext } from './context/auth';
+
+// Layout e Páginas
+import MainLayout from './layouts/MainLayout';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Agenda from './pages/Agenda';
-import MainLayout from './layouts/MainLayout';
+import ClientsPage from './pages/ClientsPage'; // Importando a nova página
 
-// Este componente protege as rotas que exigem autenticação
+// Componente para proteger rotas
 const PrivateRoute = ({ children }) => {
   const { currentUser } = useContext(AuthContext);
-  // Se não houver usuário logado, redireciona para a página de login
   return currentUser ? children : <Navigate to="/login" />;
 };
 
 const AppRoutes = () => {
   return (
     <Routes>
-      {/* Rota pública para o login */}
+      {/* Rota pública */}
       <Route path="/login" element={<Login />} />
 
-      {/* Rotas privadas que usam o MainLayout */}
+      {/* Rotas privadas aninhadas sob o MainLayout */}
       <Route 
         path="/*" 
         element={
           <PrivateRoute>
             <MainLayout>
-              <Routes> { /* Um conjunto de rotas aninhadas */}
+              <Routes>
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/agenda" element={<Agenda />} />
-                 {/* Se nenhuma outra rota corresponder, redireciona para o dashboard */}
+                {/* --- ROTA ADICIONADA AQUI --- */}
+                <Route path="/clientes" element={<ClientsPage />} />
+                {/* Rota de fallback, redireciona para a home se não encontrar */}
                 <Route path="*" element={<Navigate to="/" />} />
               </Routes>
             </MainLayout>

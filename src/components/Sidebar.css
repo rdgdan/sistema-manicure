@@ -1,99 +1,92 @@
-/* --- AURORA & PEACH CHIC SIDEBAR STYLE --- */
+
+/* --- Estilos do Componente Sidebar --- */
 
 .sidebar {
-  background: var(--card-background);
-  border-right: 1px solid var(--border-color);
-  height: 100vh; /* Ocupa a altura inteira da tela */
-  display: flex; /* ATIVA O FLEXBOX */
-  flex-direction: column; /* Organiza os filhos verticalmente */
-  padding: 1.5rem 1rem;
   width: 260px;
-  position: fixed; /* FIXA a sidebar na tela */
-  top: 0;
+  background-color: var(--background-secondary);
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem;
+  position: fixed;
+  height: 100vh;
   left: 0;
-  transition: width 0.3s ease, padding 0.3s ease, background-color 0.3s ease;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  z-index: 10;
+  top: 0;
+  z-index: 100;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* --- Header --- */
-.sidebar-header { 
-  display: flex; 
-  align-items: center; 
-  justify-content: space-between; 
-  margin-bottom: 3rem; 
-  flex-shrink: 0; /* Evita que o header encolha */
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2.5rem;
+  flex-shrink: 0;
 }
-.logo-text { font-size: 2.5rem; font-weight: 700; color: var(--text-primary); margin: 0; transition: opacity 0.3s ease; }
 
-.toggle-btn {
-  background: none; border: none;
+/* --- Logo --- */
+.logo-container { display: flex; align-items: center; gap: 0.8rem; overflow: hidden; }
+
+.logo-icon {
+  color: var(--accent-primary);
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+}
+
+.logo-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+  opacity: 1;
+  transition: opacity 0.2s ease, max-width 0.3s ease;
+}
+
+.toggle-btn { background-color: transparent; border: 1px solid var(--border-color); color: var(--text-secondary); border-radius: 8px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s ease; flex-shrink: 0; }
+.toggle-btn svg { transition: transform 0.3s ease; }
+.toggle-btn:hover { background-color: var(--background-hover); color: var(--text-primary); }
+
+/* --- Navegação e Rodapé --- */
+.sidebar-nav { flex-grow: 1; display: flex; flex-direction: column; gap: 0.8rem; overflow-y: auto; overflow-x: hidden; min-height: 0; }
+.sidebar-footer { display: flex; flex-direction: column; gap: 0.8rem; margin-top: 1rem; flex-shrink: 0; }
+
+.nav-item { display: flex; align-items: center; gap: 1rem; padding: 0.9rem 1rem; border-radius: 10px; color: var(--text-secondary); background-color: transparent; border: none; cursor: pointer; text-decoration: none; font-size: 1rem; font-weight: 500; white-space: nowrap; transition: all 0.2s ease; }
+.nav-item:hover { color: var(--text-primary); background-color: var(--background-hover); }
+.nav-item.active { background-color: var(--accent-primary); color: white; box-shadow: 0 0 15px var(--glow-color); }
+.nav-text { opacity: 1; transition: opacity 0.2s ease; }
+
+/* --- Assinatura Adicionada --- */
+.sidebar-signature {
+  font-size: 0.75rem; /* Tamanho pequeno */
   color: var(--text-secondary);
-  font-size: 1.5rem; cursor: pointer;
-  transition: color 0.2s ease, background-color 0.2s ease;
-  padding: 0.5rem; border-radius: 8px;
-}
-.toggle-btn:hover { color: var(--text-primary); background-color: var(--glow-color); }
-
-/* --- Navigation --- */
-.sidebar-nav {
-  flex-grow: 1; /* <-- A CORREÇÃO MÁGICA: Ocupa todo o espaço, empurrando o footer para baixo */
-  display: flex; 
-  flex-direction: column; 
-  gap: 0.8rem; 
-  overflow-y: auto; /* Adiciona scroll se houver muitos itens */
+  text-align: center;
+  margin-top: 1.5rem; /* Espaço acima */
+  white-space: nowrap; /* Não quebrar a linha */
+  opacity: 1;
+  transition: opacity 0.2s ease;
 }
 
-.nav-item {
-  display: flex; align-items: center;
-  gap: 1.2rem; padding: 0.9rem 1rem;
-  border-radius: 10px;
-  color: var(--text-secondary);
-  text-decoration: none; font-weight: 500;
-  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
-  flex-shrink: 0; /* Evita que os itens encolham */
+
+/* --- Estado Recolhido --- */
+.sidebar.collapsed {
+  width: 90px;
+  padding: 1.5rem 1rem;
 }
 
-.nav-item:hover { color: var(--text-primary); background-color: var(--glow-color); }
-
-/* Active styles */
-.nav-item.active {
-  color: white;
-  background-color: var(--accent);
-  box-shadow: 0 0 20px var(--accent-glow);
+.sidebar.collapsed .logo-text,
+.sidebar.collapsed .nav-text,
+.sidebar.collapsed .sidebar-signature { /* Oculta a assinatura também */
+  opacity: 0;
+  max-width: 0;
+  pointer-events: none;
 }
 
-.nav-item svg { font-size: 1.4rem; }
-.nav-item span { transition: opacity 0.3s ease; }
-
-/* --- Footer --- */
-.sidebar-footer { 
-  flex-shrink: 0; /* Evita que o footer encolha */
-  display: flex; 
-  flex-direction: column; 
-  gap: 0.8rem; 
+.sidebar.collapsed .toggle-btn svg {
+  transform: rotate(180deg);
 }
 
-.theme-toggle-btn, .logout-button {
-  display: flex; align-items: center;
-  gap: 1.2rem; padding: 0.9rem 1rem;
-  border-radius: 10px;
-  color: var(--text-secondary);
-  background: none; border: none; width: 100%;
-  text-align: left; cursor: pointer;
-  font-size: 1rem; font-weight: 500; font-family: inherit;
-  transition: background-color 0.2s ease, color 0.2s ease;
+.sidebar.collapsed .nav-item {
+  justify-content: center;
 }
-
-.theme-toggle-btn:hover, .logout-button:hover { color: var(--text-primary); background-color: var(--glow-color); }
-.theme-toggle-btn svg, .logout-button svg { font-size: 1.4rem; }
-
-/* --- Collapsed State --- */
-.sidebar.collapsed { width: 88px; padding: 1.5rem 0.5rem; align-items: center; }
-.sidebar.collapsed .logo-text, 
-.sidebar.collapsed .nav-item span, 
-.sidebar.collapsed .sidebar-footer span { opacity: 0; width: 0; overflow: hidden; }
-.sidebar.collapsed .nav-item, 
-.sidebar.collapsed .sidebar-footer button { justify-content: center; padding: 1rem; }
-.sidebar.collapsed .toggle-btn { margin-left: 0; }
