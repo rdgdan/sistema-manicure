@@ -1,11 +1,25 @@
-
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import App from './App.jsx';
+import { BrowserRouter as Router } from 'react-router-dom';
+import { AuthProvider } from './context/auth.jsx';
+import { ThemeProvider } from './contexts/ThemeContext';
+import { SidebarProvider } from './context/sidebarContext.jsx';
+import App from './App';
 import './index.css';
+import './App.css';
 
-ReactDOM.createRoot(document.getElementById('root')).render(
+const root = ReactDOM.createRoot(document.getElementById('root'));
+
+root.render(
   <React.StrictMode>
-    <App />
+    <Router>
+      <AuthProvider>
+        <ThemeProvider>
+          <SidebarProvider>
+            <App />
+          </SidebarProvider>
+        </ThemeProvider>
+      </AuthProvider>
+    </Router>
   </React.StrictMode>
 );

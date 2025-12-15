@@ -1,12 +1,16 @@
-
 import React, { useMemo } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import './CustomCalendar.css';
 
-const CustomCalendar = ({ onDateClick, holidays = [] }) => {
+const CustomCalendar = ({ onDateClick, holidays = [], events = [] }) => {
   const [currentDate, setCurrentDate] = React.useState(new Date());
 
   const weekdays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+
+  const formatDateForId = (date) => {
+    if (!date) return '';
+    return date.toISOString().split('T')[0];
+  };
 
   const days = useMemo(() => {
     const year = currentDate.getFullYear();
@@ -30,7 +34,18 @@ const CustomCalendar = ({ onDateClick, holidays = [] }) => {
     }
 
     return daysArray;
+
   }, [currentDate]);
+
+  const eventsByDate = useMemo(() => {
+    return events.reduce((acc, event) => {
+        if (event && typeof event.start === 'string') {
+            const date = event.start.split('T')[0];
+            acc[date] = true;
+        }
+        return acc;
+    }, {});
+  }, [events]);
 
   const handlePrevMonth = () => {
     setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
@@ -40,33 +55,17 @@ const CustomCalendar = ({ onDateClick, holidays = [] }) => {
     setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
   };
 
-  const formatDateForId = (date) => {
-    return date.toISOString().split('T')[0];
-  };
-
-  // ### LÓGICA DE CLASSES CORRIGIDA ###
   const getDayClassName = (dayInfo) => {
     const classes = ['day-cell'];
     const today = new Date();
     const dateStr = formatDateForId(dayInfo.date);
     const dayOfWeek = dayInfo.date.getDay();
 
-    if (dayInfo.month !== 'current') {
-      classes.push('not-current-month');
-    }
-
-    // Usa dois `if` separados para que um dia possa ser feriado E fim de semana
-    if (holidays.includes(dateStr)) {
-      classes.push('holiday-day');
-    }
-    
-    if (dayOfWeek === 0 || dayOfWeek === 6) {
-      classes.push('weekend-day');
-    }
-    
-    if (formatDateForId(dayInfo.date) === formatDateForId(today)) {
-        classes.push('today');
-    }
+    if (dayInfo.month !== 'current') classes.push('not-current-month');
+    if (holidays.includes(dateStr)) classes.push('holiday-day');
+    if (dayOfWeek === 0 || dayOfWeek === 6) classes.push('weekend-day');
+    if (formatDateForId(dayInfo.date) === formatDateForId(today)) classes.push('today');
+    if (eventsByDate[dateStr]) classes.push('has-events'); // Classe invisível
 
     return classes.join(' ');
   };
@@ -84,18 +83,19 @@ const CustomCalendar = ({ onDateClick, holidays = [] }) => {
       </div>
       <div className="calendar-grid">
         {weekdays.map(day => <div key={day} className="weekday-header">{day}</div>)}
-        {days.map((dayInfo, index) => (
-          <div
-            key={index}
-            className={getDayClassName(dayInfo)}
-            onClick={() => onDateClick(formatDateForId(dayInfo.date))}
-          >
-            <div className="day-number">{dayInfo.day}</div>
-            <div className="events-container">
-              {/* Future implementation for event dots */}
+        {days.map((dayInfo, index) => {
+          const dateStr = formatDateForId(dayInfo.date);
+          return (
+            <div
+              key={index}
+              className={getDayClassName(dayInfo)}
+              onClick={() => dayInfo.month === 'current' && onDateClick(dateStr)}
+            >
+              <div className="day-number">{dayInfo.day}</div>
+              {/* SEM BOLINHAS. LIMPO. MINIMALISTA. */}
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

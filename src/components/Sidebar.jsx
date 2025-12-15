@@ -1,22 +1,25 @@
 
-import React, { useContext } from 'react';
+import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { AuthContext } from '../context/auth';
-import { SidebarContext } from '../context/sidebar';
-import { ThemeContext } from '../context/theme';
+import { useAuth } from '../context/auth';
+import { useSidebar } from '../context/sidebarContext';
+import { useTheme } from '../contexts/ThemeContext';
 import './Sidebar.css';
-// Importando o ícone `Users`
 import { Home, Calendar, Users, LogOut, ChevronLeft, ChevronRight, Sun, Moon, Sparkles } from 'lucide-react';
 
 const Sidebar = () => {
   const navigate = useNavigate();
-  const { logout } = useContext(AuthContext);
-  const { theme, toggleTheme } = useContext(ThemeContext);
-  const { isCollapsed, toggleSidebar } = useContext(SidebarContext);
+  const { logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
+  const { isCollapsed, toggleSidebar } = useSidebar();
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
+  const handleLogout = async () => {
+    try {
+        await logout();
+        navigate('/login');
+    } catch (error) {
+        console.error("Failed to logout: ", error);
+    }
   };
 
   return (
@@ -32,7 +35,7 @@ const Sidebar = () => {
       </div>
 
       <nav className="sidebar-nav">
-        <NavLink to="/" className="nav-item">
+        <NavLink to="/" className="nav-item" end>
           <Home size={22} />
           <span className="nav-text">Início</span>
         </NavLink>
@@ -40,7 +43,6 @@ const Sidebar = () => {
           <Calendar size={22} />
           <span className="nav-text">Agenda</span>
         </NavLink>
-        {/* --- LINK ADICIONADO AQUI --- */}
         <NavLink to="/clientes" className="nav-item">
           <Users size={22} />
           <span className="nav-text">Clientes</span>

@@ -1,24 +1,19 @@
-
-import React from 'react';
-import { BrowserRouter as Router } from 'react-router-dom';
+import React, { useLayoutEffect } from 'react';
 import AppRoutes from './AppRoutes';
-import AuthProvider from './context/AuthProvider';
-import ThemeProvider from './context/ThemeProvider';
-import SidebarProvider from './context/SidebarProvider';
+import { useTheme } from './contexts/ThemeContext';
 import './App.css';
 
 function App() {
-  return (
-    <Router>
-      <AuthProvider>
-        <ThemeProvider>
-          <SidebarProvider>
-            <AppRoutes />
-          </SidebarProvider>
-        </ThemeProvider>
-      </AuthProvider>
-    </Router>
-  );
+  const { theme } = useTheme();
+
+  // useLayoutEffect para sincronizar o atributo data-theme com o estado do tema
+  // antes que o navegador pinte a tela.
+  useLayoutEffect(() => {
+    // document.documentElement se refere à tag <html>
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]); // Roda sempre que o tema mudar
+
+  return <AppRoutes />;
 }
 
 export default App;

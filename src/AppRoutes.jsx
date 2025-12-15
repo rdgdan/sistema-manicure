@@ -1,45 +1,42 @@
+import React from 'react';
+import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import Login from './pages/Login.jsx';
+import Register from './pages/Register.jsx';
+import Dashboard from './pages/Dashboard.jsx';
+import Agenda from './pages/Agenda.jsx';
+import ClientsPage from './pages/ClientsPage.jsx';
+import MainLayout from './components/MainLayout.jsx';
+import PrivateRoute from './components/PrivateRoute.jsx';
 
-import React, { useContext } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import { AuthContext } from './context/auth';
-
-// Layout e Páginas
-import MainLayout from './layouts/MainLayout';
-import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
-import Agenda from './pages/Agenda';
-import ClientsPage from './pages/ClientsPage'; // Importando a nova página
-
-// Componente para proteger rotas
-const PrivateRoute = ({ children }) => {
-  const { currentUser } = useContext(AuthContext);
-  return currentUser ? children : <Navigate to="/login" />;
+const PrivateLayout = () => {
+  return (
+    <PrivateRoute>
+      <MainLayout>
+        <Outlet />
+      </MainLayout>
+    </PrivateRoute>
+  );
 };
 
 const AppRoutes = () => {
   return (
     <Routes>
-      {/* Rota pública */}
+      {/* Rotas Públicas */}
       <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
 
-      {/* Rotas privadas aninhadas sob o MainLayout */}
-      <Route 
-        path="/*" 
-        element={
-          <PrivateRoute>
-            <MainLayout>
-              <Routes>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/agenda" element={<Agenda />} />
-                {/* --- ROTA ADICIONADA AQUI --- */}
-                <Route path="/clientes" element={<ClientsPage />} />
-                {/* Rota de fallback, redireciona para a home se não encontrar */}
-                <Route path="*" element={<Navigate to="/" />} />
-              </Routes>
-            </MainLayout>
-          </PrivateRoute>
-        }
-      />
+      {/* Redirecionamento da raiz para o dashboard */}
+      <Route path="/" element={<Navigate to="/dashboard" />} />
+
+      {/* Rotas Privadas aninhadas sob o layout principal */}
+      <Route element={<PrivateLayout />}>
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/agenda" element={<Agenda />} />
+        <Route path="/clientes" element={<ClientsPage />} />
+      </Route>
+
+      {/* Rota de Fallback para qualquer caminho não encontrado */}
+      <Route path="*" element={<Navigate to="/dashboard" />} />
     </Routes>
   );
 };

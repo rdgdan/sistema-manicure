@@ -1,60 +1,61 @@
-
-# Blueprint do Projeto: Sistema de Agendamento "Aurora"
+# Blueprint do Projeto: By Borges - Nail Design
 
 ## Visão Geral
 
-O objetivo deste projeto é criar um sistema de agendamento de clientes (CRM) moderno, intuitivo e visualmente atraente para um salão de beleza. A aplicação será um Single-Page Application (SPA) construído com React, utilizando Vite para o ambiente de desenvolvimento. O design, codinome "Aurora" (escuro) e "Pêssego Chic" (claro), prioriza uma experiência de usuário limpa, com elementos de "glassmorphism", tipografia moderna e interatividade fluida.
+Este documento serve como a fonte central de verdade para a arquitetura, design e funcionalidades da aplicação "By Borges". É um sistema de gerenciamento de clientes e agendamentos construído em React, projetado para ser intuitivo, responsivo e visualmente atraente.
 
 ---
 
-## Recursos Implementados
+## Arquitetura e Estrutura do Projeto
 
-### **Estrutura e Navegação**
+A aplicação segue uma arquitetura moderna baseada em componentes, com um gerenciamento de estado centralizado através de Contextos do React.
 
-*   **Autenticação Completa:**
-    *   Tela de Login com e-mail/senha e botão para login via Google.
-    *   Contexto de autenticação (`AuthProvider`) para gerenciar o estado do usuário de forma global e persistente.
-*   **Navegação Fluida:**
-    *   **Sidebar Recolhível:** Menu lateral para navegação principal, com estado gerenciado pelo `SidebarProvider`.
-    *   **Roteamento Centralizado:** `react-router-dom` configura todas as rotas da aplicação (`/`, `/agenda`, `/login`, `/clientes`) no componente `AppRoutes.jsx`.
-*   **Página de Clientes:**
-    *   Criada a página inicial para a gestão de clientes, acessível pela rota `/clientes`.
-    *   Inclui um cabeçalho e estrutura preparada para funcionalidades futuras.
-    *   Link de navegação adicionado à barra lateral com o ícone `Users`.
+*   **`src/main.jsx`**: Ponto de entrada da aplicação. É responsável por:
+    *   Renderizar a aplicação no DOM.
+    *   Configurar os provedores de contexto globais na ordem correta para garantir que todos os componentes tenham acesso ao estado necessário.
 
-### **Design System ("Aurora" / "Pêssego Chic")**
+*   **`src/App.jsx`**: O componente raiz da aplicação, onde as rotas principais são definidas usando `react-router-dom`.
 
-*   **Tema Duplo Dinâmico:**
-    *   Implementação de um tema escuro ("Aurora") e um tema claro ("Pêssego Chic").
-    *   `ThemeProvider` gerencia a troca de tema em toda a aplicação.
-*   **Estilos Globais e Visuais:**
-    *   `index.css` define as paletas de cores, fontes e um fundo animado com "blobs" de gradiente.
-    *   Componentes utilizam o efeito de "glassmorphism", bordas com "glow" e animações sutis para uma interface moderna.
+*   **Contextos Globais**:
+    *   **`src/context/auth.jsx`**: Gerencia o estado de autenticação do usuário. 
+        *   **Estado:** `user`, `token`.
+        *   **Ações:** `login`, `logout`.
+        *   **Hook:** `useAuth()`.
+        *   **Persistência:** O estado do usuário é persistido no `localStorage` para manter a sessão ativa.
+    *   **`src/contexts/ThemeContext.jsx`**: Gerencia o tema da interface (claro/escuro).
+        *   **Estado:** `theme` ('light' ou 'dark').
+        *   **Ação:** `toggleTheme`.
+        *   **Hook:** `useTheme()`.
+        *   **Persistência:** A preferência de tema é persistida no `localStorage`.
+    *   **`src/context/sidebarContext.jsx`**: Gerencia o estado da barra de navegação lateral.
+        *   **Estado:** `isCollapsed` (recolhida/expandida).
+        *   **Ação:** `toggleSidebar`.
+        *   **Hook:** `useSidebar()`.
 
-### **Funcionalidades Principais**
+*   **Componentes Principais**:
+    *   **`src/components/Sidebar.jsx`**: A barra de navegação principal. Utiliza os hooks `useAuth`, `useTheme`, e `useSidebar` para funcionalidade.
+    *   **Páginas (`src/pages/`)**: Componentes que representam as diferentes seções da aplicação (Login, Início, Agenda, Clientes).
 
-*   **Dashboard Interativo:**
-    *   Tela inicial com cartões de KPI (Key Performance Indicators).
-    *   Gráficos para visualização da evolução de receita e novos clientes.
-*   **Agenda Inteligente:**
-    *   Calendário interativo para visualização de agendamentos.
-    *   **Destaque de Feriados e Fins de Semana:**
-        *   Integração com a `brasilapi.com.br` via `axios` para buscar dinamicamente os feriados nacionais do ano corrente.
-        *   O calendário aplica estilos visuais distintos para Sábados, Domingos e feriados, melhorando a visualização e o planejamento.
-        *   Cores personalizadas no `CustomCalendar.css` diferenciam os dias, mantendo a identidade visual "Aurora".
-    *   **Modal de Agendamento:** Permite a criação de novos eventos na data selecionada.
+---
 
-### **Correções e Refatorações Recentes**
+## Histórico de Tarefas e Mudanças
 
-*   **Centralização de Provedores:** Todos os contextos da aplicação (Auth, Theme, Sidebar) foram centralizados no `App.jsx` para garantir a ordem correta de inicialização e evitar erros de escopo.
-*   **Correção de Bugs de UI/UX:** Resolvidos problemas de layout na `Sidebar`, funcionalidade dos botões (recolher/sair) e sobreposição do modal na `Agenda`.
-*   **Correção de Layout:** Resolvido bug de barra de rolagem duplicada ao centralizar a lógica de layout no `MainLayout.css` e limpar o `App.css`.
+### Tarefa Atual: Varredura e Limpeza do Sistema
+
+*   **Objetivo:** Diagnosticar e resolver uma série de erros que estavam impedindo a aplicação de funcionar, causados por uma arquitetura de contextos desorganizada e conflitante.
+
+*   **Passos de Execução (Concluídos):**
+    1.  **Diagnóstico:** A varredura inicial, solicitada pelo usuário, revelou a existência de múltiplos arquivos duplicados e conflitantes para os contextos de Autenticação, Tema e Sidebar.
+    2.  **Unificação do `AuthContext`:** A lógica de autenticação foi consolidada em um único arquivo mestre (`src/context/auth.jsx`), com a criação de um hook `useAuth` para consumo simplificado. O arquivo duplicado foi eliminado.
+    3.  **Unificação do `ThemeContext`:** A lógica de tema foi consolidada em `src/contexts/ThemeContext.jsx`, adotando a melhor implementação (com persistência em `localStorage`) e criando o hook `useTheme`. Os arquivos redundantes foram eliminados.
+    4.  **Unificação do `SidebarContext`:** A lógica de estado da sidebar foi unificada em `src/context/sidebarContext.jsx`, com a criação do hook `useSidebar`. Os arquivos conflitantes foram eliminados.
+    5.  **Reparo de Importações:** Uma varredura subsequente foi realizada para encontrar e corrigir todas as declarações `import` que apontavam para os arquivos deletados. Os componentes `Sidebar.jsx` e `main.jsx` foram os principais alvos e foram devidamente corrigidos.
+    6.  **Correção da Hierarquia de Provedores:** O arquivo `main.jsx` foi reestruturado para garantir que todos os provedores de contexto (`Router`, `AuthProvider`, `ThemeProvider`, `SidebarProvider`) fossem aninhados na ordem correta, disponibilizando o estado global para toda a aplicação.
+
+*   **Resultado:** A base de código está agora limpa, organizada e funcional. Os erros de compilação foram resolvidos.
 
 ---
 
 ## Próximos Passos
 
-*   Desenvolver as funcionalidades da página de **Clientes**, como adicionar, listar, editar e visualizar clientes.
-*   Implementar a funcionalidade de salvar, editar e excluir **agendamentos** no calendário.
-*   Conectar o back-end para persistir todos os dados (clientes, agendamentos, usuários).
-
+*   Aguardando a próxima diretiva do usuário.

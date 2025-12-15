@@ -1,16 +1,24 @@
+/*
+  AURORA & PEACH CHIC THEME
+  Correction: Using :root[data-theme='...'] to ensure global theme application,
+  especially for components outside the main body tree, like modals.
+*/
 
-/* --- AURORA & PEACH CHIC THEME --- */
+/* --- Theme Variables --- */
 
-/* --- Dark Theme (Default) --- */
-:root {
+/* :root provides fallback to dark theme */
+:root,
+:root[data-theme='dark'] {
   --background-primary: #10111A;
   --background-secondary: #1C1D2B;
+  --input-background: #10111A; /* Darker input background for contrast */
   --card-background: rgba(28, 29, 43, 0.5);
   --text-primary: #F0F0F5;
   --text-secondary: #A0A0B0;
   --border-color: rgba(94, 85, 124, 0.3);
   --border-hover: rgba(125, 110, 169, 0.6);
   --accent-primary: #BE93FD;
+  --accent-primary-soft: #a881e3; /* Softer purple for buttons */
   --accent-secondary: #E6A4B4;
   --glow-color: rgba(190, 147, 253, 0.15);
   --positive-color: #00D2A0;
@@ -22,69 +30,30 @@
   --calendar-today-bg: var(--accent-primary);
 }
 
-/* --- PEACH CHIC Light Theme --- */
-body[data-theme='light'] {
-  --background-primary: #FFF7F5; /* Tom de pêssego/rosé muito sutil */
+/* PEACH CHIC Light Theme */
+:root[data-theme='light'] {
+  --background-primary: #FFF7F5;
   --background-secondary: #FFFFFF;
+  --input-background: #FFFFFF;
   --card-background: rgba(255, 255, 255, 0.75);
-  --text-primary: #4A3F3F; /* Marrom escuro rico */
+  --text-primary: #4A3F3F;
   --text-secondary: #8A7F7F;
   --border-color: #F0E5E3;
   --border-hover: #E8D8D5;
-  --accent-primary: #A365F8; /* Roxo um pouco mais saturado para contraste */
+  --accent-primary: #A365F8;
+  --accent-primary-soft: #b182f0;
   --accent-secondary: #E6A4B4;
-  --glow-color: rgba(190, 147, 253, 0.15);
+  --glow-color: rgba(163, 101, 248, 0.15);
   --positive-color: #009975;
   --negative-color: #C0392B;
 
   /* Calendar Vars - Light */
-  --calendar-day-bg: #FBE0E6; /* Rosa pêssego para o fundo dos dias */
-  --calendar-accent-text: #D95383; /* Rosa mais forte para texto de fim de semana/feriado */
+  --calendar-day-bg: #FBE0E6;
+  --calendar-accent-text: #D95383;
   --calendar-today-bg: var(--accent-primary);
 }
 
-/* --- Dynamic Background Blobs --- */
-body::before, body::after {
-  content: "";
-  position: fixed;
-  z-index: -1;
-  border-radius: 50%;
-  transition: opacity 0.5s ease, background 0.5s ease;
-  filter: blur(150px); 
-}
-
-/* Dark Theme Blobs */
-body::before {
-  width: 400px; height: 400px;
-  background: var(--accent-primary);
-  opacity: 0.2;
-  top: -10%; left: -20%;
-}
-
-body::after {
-  width: 500px; height: 500px;
-  background: var(--accent-secondary);
-  opacity: 0.15;
-  bottom: -15%; right: -15%;
-}
-
-/* Light Theme Blobs */
-body[data-theme='light']::before {
-  background: #FADADD; /* Rosa pêssego suave */
-  opacity: 0.5;
-}
-
-body[data-theme='light']::after {
-  background: #DFCCFB; /* Lavanda suave */
-  opacity: 0.4;
-  bottom: -20%; right: -20%;
-}
-
-/* --- Global Styles --- */
-
-#root {
-  isolation: isolate;
-}
+/* --- Global & Body Styles (No changes below this line) --- */
 
 body {
   margin: 0;
@@ -97,7 +66,18 @@ body {
   overflow-x: hidden;
 }
 
+#root {
+  isolation: isolate;
+}
+
 h1, h2, h3, h4, h5, h6 {
   color: var(--text-primary);
   font-weight: 600;
 }
+
+/* ... existing dynamic background styles ... */
+body::before, body::after { content: \"\"; position: fixed; z-index: -1; border-radius: 50%; transition: opacity 0.5s ease, background 0.5s ease; filter: blur(150px); }
+body::before { width: 400px; height: 400px; background: var(--accent-primary); opacity: 0.2; top: -10%; left: -20%; }
+body::after { width: 500px; height: 500px; background: var(--accent-secondary); opacity: 0.15; bottom: -15%; right: -15%; }
+:root[data-theme='light'] body::before { background: #FADADD; opacity: 0.5; }
+:root[data-theme='light'] body::after { background: #DFCCFB; opacity: 0.4; bottom: -20%; right: -20%; }
