@@ -1,7 +1,7 @@
 
 # By Borges - Sistema de Agendamento para Salões de Beleza
 
-![Prévia da Aplicação]
+Prévia da Aplicação
 
 ## Visão Geral
 
