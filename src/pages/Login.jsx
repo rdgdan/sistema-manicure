@@ -89,6 +89,7 @@ const LoginPage = () => {
             onChange={(e) => setEmail(e.target.value)}
             required
             disabled={loading}
+            autoComplete="email"
           />
         </div>
 
@@ -101,6 +102,7 @@ const LoginPage = () => {
             onChange={(e) => setPassword(e.target.value)}
             required
             disabled={loading}
+            autoComplete="current-password"
           />
         </div>
         
