@@ -1,4 +1,4 @@
-import { db } from '../firebase.js';
+import { db, auth } from '../firebase.js';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, Timestamp, where, query, setDoc, getDoc } from 'firebase/firestore';
 
 // --- Collections ---
@@ -7,23 +7,16 @@ const servicesCollection = collection(db, 'services');
 const clientsCollection = collection(db, 'clients');
 const usersCollection = collection(db, 'users');
 
-// --- Funções de Perfil de Usuário e Permissões ---
-
-// Cria um perfil para o usuário no Firestore.
-// ACEITA UM OBJETO DE DADOS, tornando-a mais flexível.
-export const createUserProfile = (userId, profileData) => {
-    const userDocRef = doc(db, 'users', userId);
-    return setDoc(userDocRef, {
-        ...profileData, // Espalha os dados recebidos (ex: email, displayName, photoURL)
-        createdAt: Timestamp.now() // Adiciona o timestamp da criação
-    });
-};
-
-// Busca o perfil (e as roles) de um usuário específico
-export const getUserProfile = (userId) => {
-    const userDocRef = doc(db, 'users', userId);
-    return getDoc(userDocRef); // Use getDoc para um único documento
+// --- Helper para obter o token de autenticação ---
+const getIdToken = async () => {
+    if (!auth.currentUser) {
+        throw new Error("Nenhum usuário autenticado encontrado. Por favor, faça login novamente.");
+    }
+    // Força a atualização do token para garantir que não está expirado
+    return await auth.currentUser.getIdToken(true);
 }
+
+// --- Funções de Perfil de Usuário e Permissões (Admin) ---
 
 // Lista todos os usuários para a página de admin
 export const getAllUsers = async () => {
@@ -31,11 +24,59 @@ export const getAllUsers = async () => {
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 };
 
-// Permite que um admin atualize as roles de outro usuário
-export const updateUserRoles = (userId, roles) => {
-    const userDocRef = doc(db, 'users', userId);
-    return updateDoc(userDocRef, { roles: roles });
+// CHAMA O BACKEND SEGURO para deletar uma conta de usuário (Auth e Firestore)
+export const deleteUserAccount = async (uid) => {
+    const token = await getIdToken();
+    const response = await fetch('/api/deleteUser', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ uid })
+    });
+
+    const result = await response.json();
+    if (!response.ok) {
+        throw new Error(result.error || 'Falha ao deletar o usuário.');
+    }
+    return result;
 };
+
+// CHAMA O BACKEND SEGURO para atualizar os detalhes de um usuário (Auth e Firestore)
+export const updateUserDetails = async (uid, dataToUpdate) => {
+    const token = await getIdToken();
+    const response = await fetch('/api/updateUser', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ uid, ...dataToUpdate })
+    });
+
+    const result = await response.json();
+    if (!response.ok) {
+        throw new Error(result.error || 'Falha ao atualizar o usuário.');
+    }
+    return result;
+};
+
+// --- Funções de Perfil de Usuário (Padrão) ---
+
+export const createUserProfile = (userId, profileData) => {
+    const userDocRef = doc(db, 'users', userId);
+    return setDoc(userDocRef, {
+        ...profileData,
+        createdAt: Timestamp.now()
+    });
+};
+
+export const getUserProfile = (userId) => {
+    const userDocRef = doc(db, 'users', userId);
+    return getDoc(userDocRef);
+}
+
 
 // --- Funções de Agendamento (Schedules) --- //
 export const getSchedules = async (userId) => {

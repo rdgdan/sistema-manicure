@@ -1,6 +1,8 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
-import { getAllUsers, updateUserRoles } from '../../services/firestoreService';
-import { Loader, Search, AlertTriangle, Users } from 'lucide-react';
+import { getAllUsers, deleteUserAccount, updateUserDetails } from '../../services/firestoreService';
+import { Loader, Search, AlertTriangle, Users, Edit, Trash2, ShieldCheck, ShieldOff } from 'lucide-react';
+import UserEditModal from './UserEditModal';
 import './UserManagement.css';
 
 const UserManagement = () => {
@@ -8,44 +10,77 @@ const UserManagement = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [feedback, setFeedback] = useState({ message: '', type: '' });
+
+  // Estado para o modal de edição
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const userList = await getAllUsers();
-        setUsers(userList);
-      } catch (err) {
-        setError('Falha ao carregar a lista de usuários.');
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchUsers();
   }, []);
 
-  const handleRoleChange = async (userId, newRoles) => {
-    // Para evitar que o admin se remova por acidente
-    if (newRoles.length === 0) {
-        if (!window.confirm("Tem certeza que deseja remover as permissões de administrador deste usuário?")) {
-            return;
-        }
-    }
+  const fetchUsers = async () => {
     try {
-      await updateUserRoles(userId, newRoles);
-      setUsers(users.map(u => u.id === userId ? { ...u, roles: newRoles } : u));
+      setLoading(true);
+      setError(null);
+      const userList = await getAllUsers();
+      setUsers(userList);
     } catch (err) {
-      alert('Falha ao atualizar as permissões do usuário.');
+      setError('Falha ao carregar a lista de usuários.');
       console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const showFeedback = (message, type) => {
+    setFeedback({ message, type });
+    setTimeout(() => setFeedback({ message: '', type: '' }), 4000); // Limpa o feedback após 4 segundos
+  };
+
+  const handleDeleteUser = async (userId, userEmail) => {
+    if (window.confirm(`Tem certeza que deseja EXCLUIR permanentemente o usuário ${userEmail}? Esta ação não pode ser desfeita.`)) {
+      try {
+        await deleteUserAccount(userId);
+        setUsers(users.filter(u => u.id !== userId));
+        showFeedback(`Usuário ${userEmail} excluído com sucesso.`, 'success');
+      } catch (err) {
+        console.error("Erro ao excluir:", err);
+        showFeedback(`Falha ao excluir o usuário: ${err.message}`, 'error');
+      }
+    }
+  };
+  
+  const handleOpenEditModal = (user) => {
+    setSelectedUser(user);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedUser(null);
+  };
+
+  const handleSaveChanges = async (userId, updatedData) => {
+    try {
+      await updateUserDetails(userId, updatedData);
+      // Atualiza a lista de usuários localmente para refletir as mudanças instantaneamente
+      setUsers(users.map(u => u.id === userId ? { ...u, ...updatedData } : u));
+      showFeedback('Usuário atualizado com sucesso!', 'success');
+      handleCloseModal();
+    } catch (err) {
+        console.error("Erro ao salvar:", err);
+        showFeedback(`Falha ao salvar as alterações: ${err.message}`, 'error');
+        // Não feche o modal em caso de erro, para o usuário poder tentar novamente
+        throw err; // Lança o erro para que o modal saiba que a operação falhou
     }
   };
 
   const filteredUsers = useMemo(() => {
     return users.filter(user => 
-      user.email.toLowerCase().includes(searchQuery.toLowerCase())
+      (user.email || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (user.displayName || '').toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [users, searchQuery]);
 
@@ -77,7 +112,7 @@ const UserManagement = () => {
         );
     }
     
-    if (filteredUsers.length === 0) {
+    if (filteredUsers.length === 0 && searchQuery) {
         return (
             <div className="admin-feedback-state">
               <p>Nenhum usuário encontrado com o termo "{searchQuery}".</p>
@@ -90,28 +125,32 @@ const UserManagement = () => {
         <table className="user-table">
           <thead>
             <tr>
+              <th>Usuário</th>
               <th>E-mail</th>
+              <th>Admin</th>
               <th>Data de Cadastro</th>
-              <th>Permissão de Admin</th>
+              <th className="actions-header">Ações</th>
             </tr>
           </thead>
           <tbody>
             {filteredUsers.map(user => (
               <tr key={user.id}>
+                <td>{user.displayName || <span className='text-muted'>Não definido</span>}</td>
                 <td>{user.email}</td>
+                <td className='text-center'>
+                    {user.roles?.includes('admin') ? 
+                        <ShieldCheck size={20} className='icon-admin-yes' title='Administrador'/> : 
+                        <ShieldOff size={20} className='icon-admin-no' title='Usuário Padrão'/>
+                    }
+                </td>
                 <td>{user.createdAt?.toDate().toLocaleDateString('pt-BR') || 'N/A'}</td>
-                <td>
-                  <label className="switch-list-item" title={`Tornar ${user.email} admin`}>
-                    <input 
-                      type="checkbox" 
-                      checked={user.roles?.includes('admin') || false}
-                      onChange={(e) => {
-                        const newRoles = e.target.checked ? ['admin'] : [];
-                        handleRoleChange(user.id, newRoles);
-                      }}
-                    />
-                    <span className="slider round"></span>
-                  </label>
+                <td className='actions-cell'>
+                  <button className='action-btn edit' onClick={() => handleOpenEditModal(user)} title="Editar usuário">
+                    <Edit size={16} />
+                  </button>
+                  <button className='action-btn delete' onClick={() => handleDeleteUser(user.id, user.email)} title="Excluir usuário">
+                    <Trash2 size={16} />
+                  </button>
                 </td>
               </tr>
             ))}
@@ -123,13 +162,18 @@ const UserManagement = () => {
 
   return (
     <div className="user-management-container">
+      {feedback.message && (
+        <div className={`feedback-banner ${feedback.type}`}>
+          <p>{feedback.message}</p>
+        </div>
+      )}
       <div className="user-management-header">
-        <h2>Lista de Usuários</h2>
+        <h2>Gerenciamento de Usuários</h2>
         <div className="search-input-wrapper">
           <Search size={18} className="search-icon" />
           <input 
             type="text" 
-            placeholder="Buscar por e-mail..." 
+            placeholder="Buscar por nome ou e-mail..." 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             disabled={loading || users.length === 0}
@@ -137,6 +181,14 @@ const UserManagement = () => {
         </div>
       </div>
       {renderContent()}
+
+      {/* O Modal de Edição */}
+      <UserEditModal 
+        user={selectedUser}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onSave={handleSaveChanges}
+      />
     </div>
   );
 };
