@@ -1,45 +1,39 @@
-import admin from 'firebase-admin';
+import { adminAuth } from './firebaseAdmin';
 
-// --- INICIALIZAÇÃO DO FIREBASE ADMIN SDK ---
-// Esta é a forma correta para ambientes como a Vercel.
-// Ele automaticamente usa as variáveis de ambiente configuradas na plataforma.
-if (!admin.apps.length) {
-  try {
-    admin.initializeApp();
-  } catch (error) {
-    console.error('Firebase admin initialization error', error);
-  }
-}
-
-export default async function handler(req, res) {
+export default async function updateUser(req, res) {
     if (req.method !== 'POST') {
-        return res.status(405).json({ error: 'Method Not Allowed' });
+        res.setHeader('Allow', ['POST']);
+        return res.status(405).json({ error: `Method ${req.method} Not Allowed` });
     }
-
-    const { uid, role } = req.body;
-
-    if (!uid || !role) {
-        return res.status(400).json({ error: 'UID e role são obrigatórios.' });
-    }
-
-    // Opcional: Verificar o token do usuário que está fazendo a chamada para garantir que ele é um admin
-    // const idToken = req.headers.authorization?.split('Bearer ')[1];
-    // if (!idToken) { ... }
-    // const decodedToken = await admin.auth().verifyIdToken(idToken);
-    // if (decodedToken.role !== 'admin') { ... }
 
     try {
-        // Atualiza a custom claim 'role' do usuário
-        await admin.auth().setCustomUserClaims(uid, { role });
+        const token = req.headers.authorization?.split('Bearer ')[1];
+        if (!token) {
+            return res.status(401).json({ error: 'Acesso não autorizado: Token não fornecido.' });
+        }
 
-        // Opcional: Atualizar também no Firestore, se você mantiver os dados lá
-        // const userDocRef = admin.firestore().collection('users').doc(uid);
-        // await userDocRef.update({ role });
+        const decodedToken = await adminAuth.verifyIdToken(token);
+        const requestingUid = decodedToken.uid;
 
-        res.status(200).json({ success: true, message: `Usuário ${uid} agora tem a role ${role}.` });
+        const requestingUserRecord = await adminAuth.getUser(requestingUid);
+        const requestingUserRoles = requestingUserRecord.customClaims?.roles || [];
+
+        if (!requestingUserRoles.includes('admin')) {
+            return res.status(403).json({ error: 'Acesso negado: Requer privilégios de administrador.' });
+        }
+
+        const { uid, roles } = req.body;
+        if (!uid || !roles) {
+            return res.status(400).json({ error: 'UID do usuário e roles são obrigatórios.' });
+        }
+
+        // Define as "custom claims" (regras customizadas) do usuário-alvo.
+        await adminAuth.setCustomUserClaims(uid, { roles });
+
+        return res.status(200).json({ message: `As regras do usuário ${uid} foram atualizadas com sucesso.` });
 
     } catch (error) {
-        console.error('Erro ao atualizar custom claims:', error);
-        res.status(500).json({ error: 'Falha ao definir a role do usuário.', details: error.message });
+        console.error('Erro ao atualizar usuário:', error);
+        return res.status(500).json({ error: 'Falha ao atualizar usuário no servidor.' });
     }
 }

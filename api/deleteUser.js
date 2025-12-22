@@ -1,36 +1,39 @@
-import admin from 'firebase-admin';
+import { adminAuth } from './firebaseAdmin';
 
-// --- INICIALIZAÇÃO DO FIREBASE ADMIN SDK ---
-if (!admin.apps.length) {
-  try {
-    admin.initializeApp();
-  } catch (error) {
-    console.error('Firebase admin initialization error', error);
-  }
-}
-
-export default async function handler(req, res) {
+export default async function deleteUser(req, res) {
     if (req.method !== 'POST') {
-        return res.status(405).json({ error: 'Method Not Allowed' });
+        res.setHeader('Allow', ['POST']);
+        return res.status(405).json({ error: `Method ${req.method} Not Allowed` });
     }
-
-    const { uid } = req.body;
-
-    if (!uid) {
-        return res.status(400).json({ error: 'UID do usuário é obrigatório.' });
-    }
-
-    // Opcional: Validação do token do chamador (admin)
 
     try {
-        await admin.auth().deleteUser(uid);
-        // Se você também armazena usuários no Firestore, delete-os de lá também.
-        // await admin.firestore().collection('users').doc(uid).delete();
+        const token = req.headers.authorization?.split('Bearer ')[1];
+        if (!token) {
+            return res.status(401).json({ error: 'Acesso não autorizado: Token não fornecido.' });
+        }
 
-        res.status(200).json({ success: true, message: `Usuário ${uid} foi deletado com sucesso.` });
+        const decodedToken = await adminAuth.verifyIdToken(token);
+        const requestingUid = decodedToken.uid;
+
+        const requestingUserRecord = await adminAuth.getUser(requestingUid);
+        const requestingUserRoles = requestingUserRecord.customClaims?.roles || [];
+
+        if (!requestingUserRoles.includes('admin')) {
+            return res.status(403).json({ error: 'Acesso negado: Requer privilégios de administrador.' });
+        }
+
+        const { uid } = req.body;
+        if (!uid) {
+            return res.status(400).json({ error: 'UID do usuário é obrigatório.' });
+        }
+
+        // Deleta o usuário.
+        await adminAuth.deleteUser(uid);
+
+        return res.status(200).json({ message: `Usuário ${uid} deletado com sucesso.` });
 
     } catch (error) {
         console.error('Erro ao deletar usuário:', error);
-        res.status(500).json({ error: 'Falha ao deletar o usuário.', details: error.message });
+        return res.status(500).json({ error: 'Falha ao deletar usuário no servidor.' });
     }
 }
