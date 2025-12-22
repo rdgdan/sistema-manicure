@@ -4,19 +4,27 @@ import { X, Save } from 'lucide-react';
 import './UserEditModal.css';
 
 const UserEditModal = ({ user, isOpen, onClose, onSave }) => {
-  const [userData, setUserData] = useState({});
+  // Correção: Inicializa o estado com chaves definidas para evitar inputs não controlados.
+  const [userData, setUserData] = useState({
+    displayName: '',
+    email: '',
+    isAdmin: false,
+  });
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    // Quando o usuário a ser editado muda, atualizamos o estado do formulário
+    // Se um usuário for passado, preenche o estado do formulário.
+    // Se não, reseta para o estado inicial vazio.
     if (user) {
       setUserData({
         displayName: user.displayName || '',
         email: user.email || '',
         isAdmin: user.roles?.includes('admin') || false,
       });
+    } else {
+      setUserData({ displayName: '', email: '', isAdmin: false });
     }
-  }, [user]);
+  }, [user, isOpen]); // Roda também quando o modal é aberto/fechado
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -30,7 +38,6 @@ const UserEditModal = ({ user, isOpen, onClose, onSave }) => {
     e.preventDefault();
     setIsSaving(true);
     
-    // Prepara os dados para serem enviados de volta ao componente pai
     const roles = userData.isAdmin ? ['admin'] : [];
     const finalUserData = {
       displayName: userData.displayName,
@@ -65,6 +72,7 @@ const UserEditModal = ({ user, isOpen, onClose, onSave }) => {
               value={userData.displayName}
               onChange={handleChange}
               placeholder="Nome visível no sistema"
+              disabled={isSaving}
             />
           </div>
           <div className="form-group">
@@ -76,6 +84,7 @@ const UserEditModal = ({ user, isOpen, onClose, onSave }) => {
               value={userData.email}
               onChange={handleChange}
               placeholder="E-mail de login"
+              disabled={isSaving}
             />
           </div>
           <div className="form-group">
@@ -85,6 +94,7 @@ const UserEditModal = ({ user, isOpen, onClose, onSave }) => {
                     name="isAdmin"
                     checked={userData.isAdmin}
                     onChange={handleChange}
+                    disabled={isSaving}
                 />
                 <span className="slider round"></span>
                 <span className='switch-label'>Permissão de Administrador</span>

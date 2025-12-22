@@ -24,7 +24,8 @@ export default async function handler(req, res) {
 
   try {
     const decodedToken = await admin.auth().verifyIdToken(idToken);
-    if (decodedToken.admin !== true) {
+    // Correção: Verifica se o array de 'roles' inclui 'admin'
+    if (!decodedToken.roles?.includes('admin')) {
       return res.status(403).json({ error: 'Forbidden: User is not an admin.' });
     }
   } catch (error) {
@@ -43,11 +44,16 @@ export default async function handler(req, res) {
     const authUpdatePayload = {};
     if (dataToUpdate.email) authUpdatePayload.email = dataToUpdate.email;
     if (dataToUpdate.displayName) authUpdatePayload.displayName = dataToUpdate.displayName;
-    if (dataToUpdate.disabled) authUpdatePayload.disabled = dataToUpdate.disabled;
+    if (dataToUpdate.disabled !== undefined) authUpdatePayload.disabled = dataToUpdate.disabled;
 
     // Atualiza no Authentication
     if (Object.keys(authUpdatePayload).length > 0) {
         await admin.auth().updateUser(uid, authUpdatePayload);
+    }
+    
+    // Define as permissões personalizadas (custom claims)
+    if (dataToUpdate.roles) {
+        await admin.auth().setCustomUserClaims(uid, { roles: dataToUpdate.roles });
     }
 
     // Atualiza o documento no Firestore
