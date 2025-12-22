@@ -36,7 +36,7 @@ export const AuthProvider = ({ children }) => {
                 const userDoc = await getUserProfileFromFirestore(user.uid);
                 let profileData;
 
-                if (userDoc.exists()) {
+                if (userDoc.exists) {
                     // Perfil já existe, apenas carrega.
                     profileData = { ...userDoc.data(), id: user.uid };
                     // Garante que o admin designado tenha sempre a role de admin.
