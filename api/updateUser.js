@@ -1,42 +1,35 @@
-import { adminAuth, adminDb } from './firebaseAdmin';
+import { adminDb } from './firebaseAdmin.js';
 
-export default async function updateUser(req, res) {
-    if (req.method !== 'POST') {
-        res.setHeader('Allow', ['POST']);
-        return res.status(405).json({ error: `Method ${req.method} Not Allowed` });
+export default async function handler(req, res) {
+  // Apenas o método POST é permitido
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Método não permitido' });
+  }
+
+  const { adminUid, targetUid, isAdmin } = req.body;
+
+  // Validação básica
+  if (!adminUid || !targetUid || typeof isAdmin !== 'boolean') {
+    return res.status(400).json({ error: 'Parâmetros inválidos. É necessário adminUid, targetUid e isAdmin.' });
+  }
+
+  try {
+    // 1. Verifica se o usuário que faz a requisição é administrador
+    const adminProfileRef = adminDb.collection('users').doc(adminUid);
+    const adminProfileSnap = await adminProfileRef.get();
+
+    if (!adminProfileSnap.exists || !adminProfileSnap.data().isAdmin) {
+      return res.status(403).json({ error: 'Acesso negado. Requer privilégios de administrador.' });
     }
 
-    try {
-        const token = req.headers.authorization?.split('Bearer ')[1];
-        if (!token) {
-            return res.status(401).json({ error: 'Acesso não autorizado: Token não fornecido.' });
-        }
+    // 2. Atualiza o perfil do usuário alvo no Firestore
+    const targetUserRef = adminDb.collection('users').doc(targetUid);
+    await targetUserRef.update({ isAdmin });
 
-        const decodedToken = await adminAuth.verifyIdToken(token);
-        const requestingUid = decodedToken.uid;
+    return res.status(200).json({ message: `O usuário ${targetUid} foi atualizado com sucesso.` });
 
-        // CORRIGIDO: Verifica a role de admin no documento do usuário no Firestore.
-        const userProfileDoc = await adminDb.collection('users').doc(requestingUid).get();
-        if (!userProfileDoc.exists || !userProfileDoc.data().roles?.includes('admin')) {
-            return res.status(403).json({ error: 'Acesso negado: Requer privilégios de administrador.' });
-        }
-
-        const { uid, roles } = req.body;
-        if (!uid || !Array.isArray(roles)) {
-            return res.status(400).json({ error: 'UID do usuário e um array de roles são obrigatórios.' });
-        }
-
-        // CORRIGIDO: Atualiza as roles no documento do usuário no Firestore.
-        await adminDb.collection('users').doc(uid).set({ roles }, { merge: true });
-
-        // Opcional, mas recomendado: Sincroniza as roles para as custom claims do Auth.
-        // Isso permite que regras de segurança do Firestore/Storage usem `request.auth.token.roles`.
-        await adminAuth.setCustomUserClaims(uid, { roles });
-
-        return res.status(200).json({ message: `As regras do usuário ${uid} foram atualizadas com sucesso.` });
-
-    } catch (error) {
-        console.error('Erro ao atualizar usuário:', error);
-        return res.status(500).json({ error: 'Falha ao atualizar usuário no servidor.', details: error.message });
-    }
+  } catch (error) {
+    console.error('Erro ao atualizar usuário:', error);
+    return res.status(500).json({ error: 'Falha ao atualizar permissões do usuário', details: error.message });
+  }
 }

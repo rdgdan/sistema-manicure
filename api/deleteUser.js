@@ -1,41 +1,44 @@
-import { adminAuth, adminDb } from './firebaseAdmin';
+import { admin, adminDb } from './firebaseAdmin.js';
 
-export default async function deleteUser(req, res) {
-    if (req.method !== 'POST') {
-        res.setHeader('Allow', ['POST']);
-        return res.status(405).json({ error: `Method ${req.method} Not Allowed` });
+export default async function handler(req, res) {
+  // Permitir apenas o método DELETE
+  if (req.method !== 'DELETE') {
+    return res.status(405).json({ error: 'Método não permitido' });
+  }
+
+  const { adminUid, targetUid } = req.body;
+
+  // Validação dos parâmetros
+  if (!adminUid || !targetUid) {
+    return res.status(400).json({ error: 'adminUid e targetUid são obrigatórios.' });
+  }
+
+  try {
+    // 1. Verificar se o solicitante (adminUid) é realmente um administrador
+    const adminProfileRef = adminDb.collection('users').doc(adminUid);
+    const adminProfileSnap = await adminProfileRef.get();
+
+    if (!adminProfileSnap.exists() || !adminProfileSnap.data().isAdmin) {
+      return res.status(403).json({ error: 'Acesso negado. Apenas administradores podem deletar usuários.' });
     }
 
-    try {
-        const token = req.headers.authorization?.split('Bearer ')[1];
-        if (!token) {
-            return res.status(401).json({ error: 'Acesso não autorizado: Token não fornecido.' });
-        }
+    // 2. Deletar o usuário do Firebase Authentication
+    await admin.auth().deleteUser(targetUid);
 
-        const decodedToken = await adminAuth.verifyIdToken(token);
-        const requestingUid = decodedToken.uid;
+    // 3. Deletar o perfil do usuário do Firestore
+    const targetUserRef = adminDb.collection('users').doc(targetUid);
+    await targetUserRef.delete();
 
-        // CORRIGIDO: Verifica a role de admin no documento do usuário no Firestore.
-        const userProfileDoc = await adminDb.collection('users').doc(requestingUid).get();
-        if (!userProfileDoc.exists || !userProfileDoc.data().roles?.includes('admin')) {
-            return res.status(403).json({ error: 'Acesso negado: Requer privilégios de administrador.' });
-        }
+    return res.status(200).json({ message: `Usuário ${targetUid} deletado com sucesso.` });
 
-        const { uid } = req.body;
-        if (!uid) {
-            return res.status(400).json({ error: 'UID do usuário é obrigatório.' });
-        }
+  } catch (error) {
+    console.error(`Erro ao deletar usuário ${targetUid}:`, error);
 
-        // Deleta o usuário do Firebase Authentication.
-        await adminAuth.deleteUser(uid);
-
-        // Deleta o perfil do usuário do Firestore para manter a consistência.
-        await adminDb.collection('users').doc(uid).delete();
-
-        return res.status(200).json({ message: `Usuário ${uid} deletado com sucesso.` });
-
-    } catch (error) {
-        console.error('Erro ao deletar usuário:', error);
-        return res.status(500).json({ error: 'Falha ao deletar usuário no servidor.', details: error.message });
+    // Tratar erro caso o usuário não seja encontrado na autenticação
+    if (error.code === 'auth/user-not-found') {
+      return res.status(404).json({ error: 'Usuário não encontrado no Firebase Authentication.' });
     }
+
+    return res.status(500).json({ error: 'Falha ao deletar usuário', details: error.message });
+  }
 }
