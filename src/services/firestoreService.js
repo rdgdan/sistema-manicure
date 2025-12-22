@@ -1,57 +1,39 @@
+import { getAuth, onAuthStateChanged, getIdToken as getFirebaseAuthIdToken } from "firebase/auth";
+import { getFirestore, doc, getDoc, setDoc, collection, getDocs, updateDoc, deleteDoc } from "firebase/firestore";
 
-import { db, auth } from '../firebase.js';
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, Timestamp, where, query, setDoc, getDoc } from 'firebase/firestore';
+// --- Funções de Autenticação e Token ---
 
-// --- Coleções ---
-const schedulesCollection = collection(db, 'schedules');
-const servicesCollection = collection(db, 'services');
-const clientsCollection = collection(db, 'clients');
-const usersCollection = collection(db, 'users');
+const auth = getAuth();
+const db = getFirestore();
 
-// --- Helper para obter o token de autenticação ---
-const getIdToken = async () => {
+export const onAuthChange = (callback) => {
+    return onAuthStateChanged(auth, callback);
+};
+
+export const getIdToken = async () => {
     if (!auth.currentUser) {
-        throw new Error("Nenhum usuário autenticado. Faça login novamente.");
+        throw new Error("Usuário não autenticado.");
     }
-    return await auth.currentUser.getIdToken(true);
-}
+    return await getFirebaseAuthIdToken(auth.currentUser);
+};
 
-// --- Funções de Perfil de Usuário e Permissões (Admin) ---
+// --- Funções de API (Admin) ---
 
+// Busca TODOS os usuários (requer privilégios de admin na API)
 export const getAllUsers = async () => {
-    const snapshot = await getDocs(usersCollection);
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-};
-
-// CORREÇÃO: Função robusta para deletar usuário com catch limpo
-export const deleteUserAccount = async (uid) => {
     const token = await getIdToken();
-    const response = await fetch('/api/deleteUser', {
-        method: 'POST',
+    const response = await fetch('/api/getUsers', { // Supondo que você criará este endpoint
         headers: {
-            'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ uid })
-    });
-
-    if (!response.ok) {
-        try {
-            const errorResult = await response.json();
-            throw new Error(errorResult.error || `Erro do servidor: ${response.statusText}`);
-        } catch {
-            throw new Error(`Falha ao deletar usuário. Status: ${response.status} ${response.statusText}`);
         }
+    });
+    if (!response.ok) {
+        throw new Error('Falha ao buscar usuários');
     }
-    
-    try {
-        return await response.json();
-    } catch {
-        return { success: true }; // Retorna sucesso se não houver corpo
-    }
+    return response.json();
 };
 
-// CORREÇÃO: Função robusta para atualizar usuário com catch limpo
+// Atualiza os detalhes de um usuário específico (requer privilégios de admin na API)
 export const updateUserDetails = async (uid, dataToUpdate) => {
     const token = await getIdToken();
     const response = await fetch('/api/updateUser', {
@@ -64,83 +46,57 @@ export const updateUserDetails = async (uid, dataToUpdate) => {
     });
 
     if (!response.ok) {
+        // Lê o corpo da resposta como texto para evitar erros de JSON
+        const errorBody = await response.text();
+        let errorMessage = `Status: ${response.status}.`;
         try {
-            const errorResult = await response.json();
-            throw new Error(errorResult.error || `Erro do servidor: ${response.statusText}`);
-        } catch {
-            throw new Error(`Falha ao atualizar usuário. Status: ${response.status} ${response.statusText}`);
+            // Tenta interpretar o corpo como JSON para uma mensagem de erro mais específica
+            const errorJson = JSON.parse(errorBody);
+            errorMessage = errorJson.error || errorJson.details || errorBody;
+        } catch (e) {
+            // Se não for JSON, usa o corpo do erro como está (pode ser um log de erro do servidor)
+            errorMessage = errorBody || `Status Text: ${response.statusText}`;
         }
+        throw new Error(`Falha ao atualizar usuário. Detalhes: ${errorMessage}`);
     }
 
     try {
         return await response.json();
     } catch {
-        return { success: true }; // Retorna sucesso se não houver corpo
+        return { success: true };
     }
 };
 
+// Deleta um usuário (requer privilégios de admin na API)
+export const deleteUser = async (uid) => {
+    const token = await getIdToken();
+    const response = await fetch('/api/deleteUser', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ uid })
+    });
+    if (!response.ok) {
+        throw new Error('Falha ao deletar usuário');
+    }
+    return response.json();
+};
 
 // --- Funções de Perfil de Usuário (Padrão) ---
 
-export const createUserProfile = (userId, profileData) => {
-    return setDoc(doc(db, 'users', userId), { ...profileData, createdAt: Timestamp.now() });
+export const getUserProfile = async (uid) => {
+    const userDocRef = doc(db, "users", uid);
+    const userDoc = await getDoc(userDocRef);
+    if (userDoc.exists()) {
+        return { uid: userDoc.id, ...userDoc.data() };
+    } else {
+        return null; // Ou lançar um erro, dependendo da sua lógica
+    }
 };
 
-export const getUserProfile = (userId) => {
-    return getDoc(doc(db, 'users', userId));
-}
-
-// --- Funções de Agendamento (Schedules) --- //
-export const getSchedules = async (userId) => {
-    const q = query(schedulesCollection, where("userId", "==", userId));
-    const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), start: doc.data().start?.toDate(), end: doc.data().end?.toDate() }));
-};
-
-export const addSchedule = (schedule) => addDoc(schedulesCollection, { ...schedule, start: Timestamp.fromDate(new Date(schedule.start)), end: Timestamp.fromDate(new Date(schedule.end)) });
-export const updateSchedule = (id, schedule) => updateDoc(doc(db, 'schedules', id), { ...schedule, ...(schedule.start && { start: Timestamp.fromDate(new Date(schedule.start)) }), ...(schedule.end && { end: Timestamp.fromDate(new Date(schedule.end)) }) });
-export const deleteSchedule = (id) => deleteDoc(doc(db, 'schedules', id));
-
-// --- Funções de Serviços (Services) --- //
-export const getServices = async (userId) => {
-    const q = query(servicesCollection, where("userId", "==", userId));
-    const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-};
-
-export const addService = (service) => addDoc(servicesCollection, { ...service, createdAt: Timestamp.now() });
-export const updateService = (id, serviceData) => updateDoc(doc(db, 'services', id), serviceData);
-export const deleteService = (id) => deleteDoc(doc(db, 'services', id));
-
-// --- Funções de Clientes (Clients) --- //
-export const getClients = async (userId) => {
-    const q = query(clientsCollection, where("userId", "==", userId));
-    const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-};
-
-export const addClient = (client) => addDoc(clientsCollection, { ...client, createdAt: Timestamp.now() });
-export const updateClient = (id, clientData) => updateDoc(doc(db, 'clients', id), clientData);
-export const deleteClient = (id) => deleteDoc(doc(db, 'clients', id));
-
-// --- FUNÇÃO DE MIGRAÇÃO DE DADOS ---
-export const migrateDataToUser = async (userId) => {
-    if (!userId) throw new Error("UserID é necessário para a migração.");
-
-    const migrateCollection = async (coll, type) => {
-        const q = query(coll, where("userId", "==", null));
-        const snapshot = await getDocs(q);
-        const promises = [];
-        snapshot.forEach(document => {
-            const docRef = doc(db, type, document.id);
-            promises.push(updateDoc(docRef, { userId: userId }));
-        });
-        await Promise.all(promises);
-        return snapshot.size;
-    };
-
-    const migratedClients = await migrateCollection(clientsCollection, 'clients');
-    const migratedServices = await migrateCollection(servicesCollection, 'services');
-
-    return { migratedClients, migratedServices };
+export const createUserProfile = async (uid, userData) => {
+    const userDocRef = doc(db, "users", uid);
+    await setDoc(userDocRef, userData);
 };
