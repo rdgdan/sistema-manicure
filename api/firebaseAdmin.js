@@ -11,8 +11,9 @@ if (!admin.apps.length) {
       credential: admin.credential.cert({
         projectId: process.env.FIREBASE_PROJECT_ID,
         clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        // O Vercel pode remover as quebras de linha. O .replace garante que elas existam.
-        privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\n/g, '\n'),
+        // CORREÇÃO: A lógica .replace agora busca corretamente pela string "\\n" 
+        // e a substitui por uma quebra de linha real "\n".
+        privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
       })
     });
 
