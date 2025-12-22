@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { getAllUsers, deleteUserAccount, updateUserDetails } from '../../services/firestoreService';
+import { getAllUsers, deleteUser, updateUserDetails } from '../../services/firestoreService';
 import { Loader, Search, AlertTriangle, Users, Edit, Trash2, ShieldCheck, ShieldOff } from 'lucide-react';
 import UserEditModal from './UserEditModal';
 import './UserManagement.css';
@@ -42,7 +42,7 @@ const UserManagement = () => {
   const handleDeleteUser = async (userId, userEmail) => {
     if (window.confirm(`Tem certeza que deseja EXCLUIR permanentemente o usuário ${userEmail}? Esta ação não pode ser desfeita.`)) {
       try {
-        await deleteUserAccount(userId);
+        await deleteUser(userId);
         setUsers(users.filter(u => u.id !== userId));
         showFeedback(`Usuário ${userEmail} excluído com sucesso.`, 'success');
       } catch (err) {
