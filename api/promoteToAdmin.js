@@ -1,4 +1,4 @@
-import { adminAuth } from './firebaseAdmin.js';
+Fizimport { adminAuth } from './firebaseAdmin.js';
 
 export default async function handler(req, res) {
   // Apenas permite requisições POST para segurança básica

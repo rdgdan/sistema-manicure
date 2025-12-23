@@ -16,23 +16,24 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }) => {
     const [currentUser, setCurrentUser] = useState(null);
-    const [isAdmin, setIsAdmin] = useState(false); // Novo estado para verificar se é admin
+    const [isAdmin, setIsAdmin] = useState(false);
+    const [debugClaims, setDebugClaims] = useState(null); // Estado para depuração
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             if (user) {
-                // Força a atualização do token para pegar as custom claims mais recentes.
                 const idTokenResult = await user.getIdTokenResult(true);
-                // Verifica a permissão de admin a partir do token.
                 const isAdminClaim = idTokenResult.claims.admin === true;
+                
+                setDebugClaims(idTokenResult.claims); // Armazena as claims para depuração
                 setIsAdmin(isAdminClaim);
                 setCurrentUser(user);
 
             } else {
-                // Usuário deslogado.
                 setCurrentUser(null);
                 setIsAdmin(false);
+                setDebugClaims(null); // Limpa as claims ao deslogar
             }
             setLoading(false);
         });
@@ -59,7 +60,8 @@ export const AuthProvider = ({ children }) => {
     const value = {
         currentUser,
         loading,
-        isAdmin, // Expõe o novo estado
+        isAdmin,
+        debugClaims, // Expõe as claims para depuração
         signup,
         login,
         logout,

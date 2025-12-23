@@ -1,11 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { jwtDecode } from 'jwt-decode'; // Importa a biblioteca de decodificação
 
 const ManageUsersPage = () => {
-    // MENSAGEM DE DEBUG V2 - PARA CONFIRMAR ATUALIZAÇÃO DO CÓDIGO
-    console.log("--- VERSÃO 2 DO CÓDIGO SENDO EXECUTADA --- Se você vê esta mensagem, o código está atualizado.");
-
     const { currentUser } = useAuth();
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -19,22 +15,7 @@ const ManageUsersPage = () => {
         }
 
         try {
-            const idToken = await currentUser.getIdToken(true); // Pega o token
-
-            // --- INÍCIO DO CÓDIGO DE DEBUG ---
-            try {
-                console.log("--- INICIANDO DEBUG DO TOKEN ---");
-                const decodedToken = jwtDecode(idToken);
-                console.log("Conteúdo do Token Decodificado:", decodedToken);
-                if (decodedToken.admin === true) {
-                    console.log("VERIFICAÇÃO: A permissão de ADMIN está PRESENTE no token.");
-                } else {
-                    console.log("VERIFICAÇÃO: A permissão de ADMIN NÃO FOI ENCONTRADA no token. Por favor, faça LOGOUT e LOGIN novamente.");
-                }
-            } catch (e) {
-                console.error("Erro ao decodificar o token:", e);
-            }
-            // --- FIM DO CÓDIGO DE DEBUG ---
+            const idToken = await currentUser.getIdToken(true); // Pega o token atualizado
 
             const response = await fetch('/api/getUsers', {
                 headers: {
@@ -57,6 +38,7 @@ const ManageUsersPage = () => {
     };
 
     useEffect(() => {
+        // Apenas busca usuários se o currentUser estiver definido
         if (currentUser) {
             fetchUsers();
         }
@@ -78,7 +60,7 @@ const ManageUsersPage = () => {
                 const errorData = await response.json();
                 throw new Error(errorData.error || 'Falha ao atualizar usuário.');
             }
-            fetchUsers(); // Recarrega a lista
+            fetchUsers(); // Recarrega a lista após a mudança
         } catch (err) {
             setError(err.message);
         }
@@ -101,13 +83,12 @@ const ManageUsersPage = () => {
                     const errorData = await response.json();
                     throw new Error(errorData.error || 'Falha ao deletar usuário.');
                 }
-                fetchUsers(); // Recarrega a lista
+                fetchUsers(); // Recarrega a lista após deletar
             } catch (err) {
                 setError(err.message);
             }
         }
     };
-
 
     if (loading) {
         return <div className="container mx-auto p-4">Carregando usuários...</div>;
