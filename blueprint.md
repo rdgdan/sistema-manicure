@@ -2,39 +2,54 @@
 
 ## Visão Geral
 
-Este documento serve como a fonte central de verdade para a arquitetura, design e funcionalidades da aplicação "By Borges". É um sistema de gerenciamento de clientes e agendamentos construído em React, projetado para ser intuitivo, responsivo e visualmente atraente.
+Este documento serve como a fonte central de verdade para a arquitetura, design e funcionalidades da aplicação "By Borges". É um sistema de gerenciamento de clientes e agendamentos construído em React, utilizando Firebase como backend e Vercel para deploy.
+
+---
+
+## Funcionalidade Essencial: Promoção de Administrador
+
+Para garantir a segurança e o controle de acesso, o sistema utiliza um método de "promoção" para designar o administrador principal da aplicação. Isso evita a necessidade de ter e-mails de clientes no código-fonte e permite que cada implantação tenha seu próprio administrador.
+
+### Como Funciona:
+
+1.  **Variável de Ambiente:** No painel do projeto na Vercel (ou em um arquivo `.env.local` para desenvolvimento), uma variável de ambiente chamada `VITE_PENDING_ADMIN_EMAIL` deve ser configurada com o e-mail do usuário que será o administrador.
+
+2.  **Primeiro Login:** Quando o usuário com o e-mail correspondente faz login pela primeira vez, o sistema identifica que ele é o "admin pendente".
+
+3.  **Botão de Ativação:** Um painel especial de ativação aparecerá no topo do **Dashboard**. Este painel é visível apenas para este usuário específico e somente se ele ainda não tiver as permissões de administrador.
+
+4.  **Ação Única:** Ao clicar no botão "Ativar Modo Administrador", o sistema executa uma chamada de API segura que atribui permanentemente a função de `admin` à conta daquele usuário no Firebase.
+
+5.  **Conclusão:** A página recarrega, a permissão de admin é aplicada e o painel de ativação não aparecerá mais.
+
+Este fluxo garante que apenas o proprietário do projeto (que tem acesso às variáveis de ambiente da Vercel) pode designar quem será o administrador.
 
 ---
 
 ## Histórico de Implementação
 
-(O histórico anterior, incluindo a v1.3, permanece o mesmo)
+(O histórico anterior, incluindo a v2 sobre o fluxo de categoria, permanece inalterado e válido).
 
 ---
 
-## Plano de Implementação Atual: Fluxo de Categoria Definitivo
+## Plano de Implementação Atual: Sistema de Promoção de Admin Sustentável
 
-**Solicitação Crítica do Usuário (Evolução):**
+**Solicitação do Usuário:** Criar um método permanente e seguro para definir o administrador de uma nova implantação sem ter que modificar o código ou acessar o banco de dados diretamente. A solução deve ser reutilizável e fazer parte do fluxo de deploy.
 
-Após a implementação do seletor de categorias no modal de serviço, o usuário identificou uma falha de fluxo de trabalho: a incapacidade de criar uma nova categoria *dentro* do próprio modal. A sugestão foi aprimorar a interface para permitir tanto a seleção de uma categoria existente quanto a criação de uma nova dinamicamente, evitando a interrupção da tarefa.
+**Plano de Ação Implementado:**
 
-**Plano de Ação Aprovado (v2):**
+1.  **API Segura (`api/promoteToAdmin.js`):**
+    *   Criada uma nova API que recebe um e-mail.
+    *   **Validação Crítica:** A API só prossegue se o e-mail recebido for o mesmo definido na variável de ambiente `VITE_PENDING_ADMIN_EMAIL` no servidor.
+    *   Encontra o usuário no Firebase pelo e-mail e atribui a ele a `custom claim` de `{ admin: true }`.
+    *   A API antiga e insegura (`grantAdminAccess.js`) foi removida.
 
-1.  **Refatoração do Modal de Serviço (`ServiceModal.jsx`):**
-    *   Introduzir um estado `isCreatingCategory` para gerenciar a interface do usuário.
-    *   Implementar uma UI de modo duplo: 
-        *   **Modo Padrão:** Exibir o `<select>` para escolher uma categoria existente.
-        *   **Modo de Criação:** Exibir um `<input type="text">` para o nome da nova categoria.
-    *   Adicionar um botão ou link para alternar entre os dois modos.
+2.  **Interface Inteligente (`Dashboard.jsx`):**
+    *   O componente agora lê a variável `import.meta.env.VITE_PENDING_ADMIN_EMAIL`.
+    *   Renderiza um componente `AdminPromotionButton` somente se o e-mail do usuário logado corresponder à variável de ambiente e se ele ainda não for um admin.
+    *   Este botão chama a nova API `/api/promoteToAdmin` para iniciar o processo de promoção.
 
-2.  **Expansão do Contexto de Dados (`DataContext.js`):**
-    *   Criar e exportar uma nova função assíncrona, `addServiceCategory`.
-    *   Esta função receberá o nome da nova categoria, a adicionará à coleção `service_categories` no Firestore e retornará o `id` do documento recém-criado.
+3.  **Documentação (`blueprint.md`):**
+    *   Este documento foi atualizado para detalhar o novo fluxo de promoção de administrador, servindo como guia para futuras implantações.
 
-3.  **Lógica de Submissão Inteligente (`handleSubmit` em `ServiceModal.jsx`):**
-    *   Se `isCreatingCategory` for verdadeiro, a função primeiro chamará `addServiceCategory`.
-    *   Ela então usará o `id` retornado para o campo `categoryId` ao criar o novo serviço.
-    *   Se for falso, o comportamento permanece o mesmo, usando o `id` do `<select>`.
-
-4.  **Estilização (`ServiceModal.css`):**
-    *   Garantir que os novos elementos da interface (campo de texto, botão de alternância) estejam perfeitamente alinhados com o design visual do modal.
+4.  **Próximo Passo:** Preparar os arquivos para o commit no Git.

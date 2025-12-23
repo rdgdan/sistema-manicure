@@ -18,6 +18,15 @@
     --border-color: #334155;
     --modal-overlay-bg: rgba(10, 5, 20, 0.7);
     --form-element-filter: invert(0.8);
+
+    /* CORES DE ALERTA */
+    --warning-bg-light: #2c1f03;
+    --warning-border: #f59e0b; /* Amarelo/Laranja */
+    --warning-text-strong: #fde047;
+
+    /* CORES DE SUCESSO E ERRO */
+    --success-text: #22c55e; /* Verde */
+    --danger-text: #ef4444; /* Vermelho */
 }
 
 [data-theme='light'] {
@@ -39,8 +48,16 @@
     --border-color: #e2e8f0;
     --modal-overlay-bg: rgba(248, 250, 252, 0.7);
     --form-element-filter: invert(0.2);
-}
 
+    /* CORES DE ALERTA - TEMA CLARO */
+    --warning-bg-light: #fffbeb;
+    --warning-border: #f59e0b;
+    --warning-text-strong: #b45309;
+
+    /* CORES DE SUCESSO E ERRO */
+    --success-text: #16a34a;
+    --danger-text: #dc2626;
+}
 
 body {
     margin: 0;
