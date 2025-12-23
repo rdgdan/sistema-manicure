@@ -1,17 +1,6 @@
 import { adminAuth } from './firebaseAdmin.js';
 
 export default async function handler(req, res) {
-  // --- INÍCIO DO CÓDIGO DE DEBUG ---
-  console.log("--- Verificando Variáveis de Ambiente na Vercel ---");
-  console.log("FIREBASE_PROJECT_ID existe?", !!process.env.FIREBASE_PROJECT_ID);
-  console.log("FIREBASE_CLIENT_EMAIL existe?", !!process.env.FIREBASE_CLIENT_EMAIL);
-  console.log("FIREBASE_PRIVATE_KEY existe?", !!process.env.FIREBASE_PRIVATE_KEY);
-  if (process.env.FIREBASE_PRIVATE_KEY) {
-    console.log("FIREBASE_PRIVATE_KEY começa com '-----BEGIN'?", process.env.FIREBASE_PRIVATE_KEY.startsWith('-----BEGIN'));
-  }
-  console.log("---------------------------------------------------");
-  // --- FIM DO CÓDIGO DE DEBUG ---
-
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
