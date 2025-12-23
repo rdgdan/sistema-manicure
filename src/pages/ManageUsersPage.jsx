@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext'; // 1. Importar o hook de autenticação
+import { useAuth } from '../context/AuthContext';
+import { jwtDecode } from 'jwt-decode'; // Importa a biblioteca de decodificação
 
 const ManageUsersPage = () => {
-    const { currentUser } = useAuth(); // 2. Obter o usuário atual
+    const { currentUser } = useAuth();
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // 3. Modificar a função fetchUsers para enviar o token
     const fetchUsers = async () => {
         if (!currentUser) {
             setError("Autenticação necessária para acessar esta página.");
@@ -16,7 +16,22 @@ const ManageUsersPage = () => {
         }
 
         try {
-            const idToken = await currentUser.getIdToken(true);
+            const idToken = await currentUser.getIdToken(true); // Pega o token
+
+            // --- INÍCIO DO CÓDIGO DE DEBUG ---
+            try {
+                const decodedToken = jwtDecode(idToken);
+                console.log("Conteúdo do Token Decodificado:", decodedToken);
+                if (decodedToken.admin === true) {
+                    console.log("VERIFICAÇÃO: A permissão de ADMIN está PRESENTE no token.");
+                } else {
+                    console.log("VERIFICAÇÃO: A permissão de ADMIN NÃO FOI ENCONTRADA no token. Por favor, faça LOGOUT e LOGIN novamente.");
+                }
+            } catch (e) {
+                console.error("Erro ao decodificar o token:", e);
+            }
+            // --- FIM DO CÓDIGO DE DEBUG ---
+
             const response = await fetch('/api/getUsers', {
                 headers: {
                     'Authorization': `Bearer ${idToken}`,
@@ -38,13 +53,11 @@ const ManageUsersPage = () => {
     };
 
     useEffect(() => {
-        // Só executa se o usuário estiver carregado
         if (currentUser) {
             fetchUsers();
         }
-    }, [currentUser]); // Depende do currentUser para re-executar se ele mudar
+    }, [currentUser]);
 
-    // 4. Modificar as outras funções para também enviarem o token
     const handleToggleAdmin = async (uid, isAdmin) => {
         try {
             const idToken = await currentUser.getIdToken(true);
@@ -91,6 +104,7 @@ const ManageUsersPage = () => {
         }
     };
 
+
     if (loading) {
         return <div className="container mx-auto p-4">Carregando usuários...</div>;
     }
@@ -117,13 +131,13 @@ const ManageUsersPage = () => {
                             <tr key={user.uid}>
                                 <td className="py-2 px-4 border-b">{user.displayName || 'N/A'}</td>
                                 <td className="py-2 px-4 border-b">{user.email}</td>
-                                <td className="py-2 px-4 border-b">{user.customAttributes?.admin ? 'Sim' : 'Não'}</td>
+                                <td className="py-2 px-4 border-b">{user.isAdmin ? 'Sim' : 'Não'}</td>
                                 <td className="py-2 px-4 border-b">
                                     <button
-                                        onClick={() => handleToggleAdmin(user.uid, user.customAttributes?.admin)}
-                                        className={`mr-2 px-4 py-2 rounded ${user.customAttributes?.admin ? 'bg-yellow-500' : 'bg-green-500'} text-white`}
+                                        onClick={() => handleToggleAdmin(user.uid, user.isAdmin)}
+                                        className={`mr-2 px-4 py-2 rounded ${user.isAdmin ? 'bg-yellow-500' : 'bg-green-500'} text-white`}
                                     >
-                                        {user.customAttributes?.admin ? 'Rebaixar' : 'Promover'}
+                                        {user.isAdmin ? 'Rebaixar' : 'Promover'}
                                     </button>
                                     <button
                                         onClick={() => handleDeleteUser(user.uid)}
