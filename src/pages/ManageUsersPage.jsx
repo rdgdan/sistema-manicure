@@ -3,6 +3,9 @@ import { useAuth } from '../context/AuthContext';
 import { jwtDecode } from 'jwt-decode'; // Importa a biblioteca de decodificação
 
 const ManageUsersPage = () => {
+    // MENSAGEM DE DEBUG V2 - PARA CONFIRMAR ATUALIZAÇÃO DO CÓDIGO
+    console.log("--- VERSÃO 2 DO CÓDIGO SENDO EXECUTADA --- Se você vê esta mensagem, o código está atualizado.");
+
     const { currentUser } = useAuth();
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -20,6 +23,7 @@ const ManageUsersPage = () => {
 
             // --- INÍCIO DO CÓDIGO DE DEBUG ---
             try {
+                console.log("--- INICIANDO DEBUG DO TOKEN ---");
                 const decodedToken = jwtDecode(idToken);
                 console.log("Conteúdo do Token Decodificado:", decodedToken);
                 if (decodedToken.admin === true) {
