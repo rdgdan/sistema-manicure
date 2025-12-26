@@ -20,6 +20,7 @@ export const DataProvider = ({ children }) => {
   const [clients, setClients] = useState([]);
   const [services, setServices] = useState([]);
   const [serviceCategories, setServiceCategories] = useState([]);
+  const [users, setUsers] = useState([]); // Estado para usuários
   const [loading, setLoading] = useState(true);
   
   const initialLoadDone = useRef(false);
@@ -30,6 +31,7 @@ export const DataProvider = ({ children }) => {
       setClients([]);
       setServices([]);
       setServiceCategories([]);
+      setUsers([]); // Limpa usuários no logout
       setLoading(true);
       initialLoadDone.current = false;
       return;
@@ -43,6 +45,7 @@ export const DataProvider = ({ children }) => {
       clients: { setter: setClients, isPrivate: true },
       services: { setter: setServices, isPrivate: false },
       service_categories: { setter: setServiceCategories, isPrivate: false },
+      users: { setter: setUsers, isPrivate: false }, // Adiciona a coleção de usuários
     };
     const collectionNames = Object.keys(collectionsToLoad);
     const loadedCollections = new Set();
@@ -122,10 +125,9 @@ export const DataProvider = ({ children }) => {
   const updateService = (id, data) => updateDoc(doc(db, 'services', id), data);
   const deleteService = (id) => deleteDoc(doc(db, 'services', id));
   
-  // NOVA FUNÇÃO PARA ADICIONAR CATEGORIAS DE SERVIÇO
   const addServiceCategory = async (categoryName) => {
     const docRef = await addDoc(collection(db, 'service_categories'), { name: categoryName });
-    return docRef.id; // Retorna o ID da nova categoria
+    return docRef.id;
   };
 
   const deleteSchedule = (id) => deleteDoc(doc(db, 'schedules', id));
@@ -166,11 +168,15 @@ export const DataProvider = ({ children }) => {
   const addSchedule = (data) => handleScheduleSave(data);
   const updateSchedule = (id, data) => handleScheduleSave({ ...data, id });
 
+  // Função para atualizar dados de um usuário (ex: role)
+  const updateUser = (id, data) => updateDoc(doc(db, 'users', id), data);
+
   const value = {
     schedules: enrichedSchedules,
     clients,
     services,
     serviceCategories,
+    users, // Exporta os usuários
     loading,
     addSchedule,
     updateSchedule,
@@ -181,7 +187,8 @@ export const DataProvider = ({ children }) => {
     addService,   
     updateService,
     deleteService,
-    addServiceCategory, // EXPORTANDO A NOVA FUNÇÃO
+    addServiceCategory,
+    updateUser, // Exporta a função de update
   };
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;

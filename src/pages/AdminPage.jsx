@@ -1,18 +1,11 @@
 import React from 'react';
-import UserManagement from '../components/admin/UserManagement';
-import './AdminPage.css';
 
 const AdminPage = () => {
   return (
-    <div className="admin-page-container">
-      <div className="admin-page-header">
-        <h1>Painel de Administração</h1>
-        <p>Gerencie todos os usuários do sistema.</p>
-      </div>
-      
-      <div className="admin-page-content">
-        <UserManagement />
-      </div>
+    <div className="admin-page">
+      <h1>Gestão de Usuários</h1>
+      <p>Aqui você poderá ver, editar, e gerenciar os usuários da plataforma.</p>
+      {/* A lista de usuários e a lógica de gerenciamento serão adicionadas aqui */}
     </div>
   );
 };

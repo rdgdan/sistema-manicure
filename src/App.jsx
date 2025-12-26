@@ -1,69 +1,76 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { MantineProvider, createTheme } from '@mantine/core';
+import '@mantine/core/styles.css';
 
-// Layouts
-import MainLayout from './layouts/MainLayout';
-import AuthLayout from './layouts/AuthLayout';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { DataProvider } from './contexts/DataContext';
+import Sidebar from './components/Sidebar';
 
-// Context-aware Route Guards
-import PrivateRoute from './components/auth/PrivateRoute'; // Corrected import path
-import AdminRoute from './components/auth/AdminRoute'; // Corrected import path
+// Importações baseadas estritamente nos arquivos existentes em src/pages
+import LoginPage from './pages/Login.jsx';
+import RegisterPage from './pages/RegisterPage.jsx';
+import DashboardPage from './pages/Dashboard.jsx';
+import ServicesPage from './pages/ServicesPage.jsx';
+import AdminPage from './pages/Admin.jsx';
+import AgendaPage from './pages/Agenda.jsx';
+import ClientsPage from './pages/ClientsPage.jsx';
+import ConfiguracoesPage from './pages/Configuracoes.jsx';
 
-// Pages
-import LoginPage from './pages/Login';
-import RegisterPage from './pages/RegisterPage';
-import Dashboard from './pages/Dashboard';
-import Agenda from './pages/Agenda';
-import ClientsPage from './pages/ClientsPage';
-import ServicesPage from './pages/ServicesPage';
-import Configuracoes from './pages/Configuracoes';
-import AdminPage from './pages/AdminPage';
+import './index.css';
 
-// Este componente agrupa as rotas que exigem o MainLayout e autenticação
-const ProtectedPages = () => (
-  <PrivateRoute>
-    <MainLayout />
-  </PrivateRoute>
+const theme = createTheme({
+  fontFamily: '-apple-system, BlinkMacSystemFont, \'Segoe UI\', \'Roboto\', \'Oxygen\', \'Ubuntu\', \'Cantarell\', \'Fira Sans\', \'Droid Sans\', \'Helvetica Neue\', sans-serif',
+  primaryColor: 'violet',
+});
+
+const ProtectedRoute = ({ children }) => {
+  const { currentUser, loading } = useAuth();
+  if (loading) return <div>Carregando...</div>;
+  if (!currentUser) return <Navigate to="/login" />;
+  return children;
+};
+
+const AdminRoute = ({ children }) => {
+    const { currentUser, isAdmin, loading } = useAuth();
+    if (loading) return <div>Carregando...</div>;
+    if (!currentUser || !isAdmin) return <Navigate to="/dashboard" />;
+    return children;
+};
+
+const MainLayout = ({ children }) => (
+  <div className="app-layout">
+    <Sidebar />
+    <main className="main-content">{children}</main>
+  </div>
 );
-
-// Este componente agrupa as rotas públicas de autenticação
-const AuthPages = () => (
-    <AuthLayout />
-);
-
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        {/* Rotas Públicas: /login e /register */}
-        <Route element={<AuthPages />}>
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-        </Route>
+    <MantineProvider theme={theme}>
+      <Router>
+        <AuthProvider>
+          <DataProvider>
+            <Routes>
+              {/* Rotas Públicas */}
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
 
-        {/* Rotas Protegidas: Todas as outras */}
-        <Route path="/" element={<ProtectedPages />}>
-            <Route index element={<Navigate to="/dashboard" replace />} />
-            <Route path="dashboard" element={<Dashboard />} />
-            <Route path="agenda" element={<Agenda />} />
-            <Route path="clientes" element={<ClientsPage />} />
-            <Route path="servicos" element={<ServicesPage />} />
-            <Route path="configuracoes" element={<Configuracoes />} />
-            <Route 
-                path="admin" 
-                element={
-                    <AdminRoute>
-                        <AdminPage />
-                    </AdminRoute>
-                } 
-            />
-        </Route>
-
-        {/* Rota de fallback para qualquer outra coisa, redireciona para o login */}
-        <Route path="*" element={<Navigate to="/login" replace />} />
-      </Routes>
-    </BrowserRouter>
+              {/* Rotas Protegidas com Layout Principal */}
+              <Route path="/*" element={<ProtectedRoute><MainLayout><Routes>
+                <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                <Route path="/dashboard" element={<DashboardPage />} />
+                <Route path="/agenda" element={<AgendaPage />} />
+                <Route path="/clientes" element={<ClientsPage />} />
+                <Route path="/servicos" element={<ServicesPage />} />
+                <Route path="/configuracoes" element={<ConfiguracoesPage />} />
+                <Route path="/admin" element={<AdminRoute><AdminPage /></AdminRoute>} />
+              </Routes></MainLayout></ProtectedRoute>} />
+            </Routes>
+          </DataProvider>
+        </AuthProvider>
+      </Router>
+    </MantineProvider>
   );
 }
 

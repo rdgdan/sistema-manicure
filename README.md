@@ -1,134 +1,140 @@
+# By Borges - Sistema de Gestão de Barbearia (White-Label)
 
-# By Borges - Sistema de Agendamento para Salões de Beleza
+Este é um sistema completo de gestão para barbearias e salões, construído com React e Firebase. O projeto foi desenhado para ser **White-Label**, permitindo que qualquer desenvolvedor o personalize, configure e revenda para seus próprios clientes com facilidade.
 
-Prévia da Aplicação
+## Funcionalidades Principais
 
-## Visão Geral
-
-**By Borges** é um sistema de gerenciamento de clientes e agendamentos completo, construído com as tecnologias mais modernas de React. Projetado para ser intuitivo, responsivo e visualmente deslumbrante, este projeto é a solução perfeita para pequenos negócios, como salões de beleza, barbearias e estúdios, que precisam de um sistema robusto e fácil de usar.
-
-Este projeto é de **código aberto** e foi desenvolvido para ser facilmente personalizável e "white-label". Com este guia, qualquer desenvolvedor pode configurar, adaptar e vender este sistema como um serviço para seus próprios clientes.
-
----
-
-## ✨ Funcionalidades Principais
-
-*   **Gestão Completa de Agendamentos:** Crie, edite, visualize e exclua agendamentos em um calendário interativo.
-*   **Cadastro de Clientes:** Mantenha um banco de dados de seus clientes com informações de contato.
-*   **Catálogo de Serviços:** Organize seus serviços em categorias e defina preços e durações.
-*   **Fluxo de Trabalho Inteligente:** Crie novos clientes e novas categorias de serviço diretamente nos modais de agendamento e serviço, sem interromper sua tarefa.
-*   **Painel de Administração:** Uma página segura para gerenciar usuários, promover ou rebaixar administradores e deletar contas.
-*   **Design Moderno e Responsivo:** Uma interface de usuário premium que funciona perfeitamente em desktops e dispositivos móveis.
-*   **Tema Claro e Escuro:** Adapte a aparência para a preferência do usuário ou para as condições de iluminação.
-*   **Backend Robusto com Firebase:** Utiliza o Firestore do Firebase, um banco de dados NoSQL em tempo real, para uma performance segura e escalável.
-*   **Componentes Reutilizáveis:** Construído com uma arquitetura de componentes limpa e de fácil manutenção.
+- **Autenticação Segura:** Cadastro e login com E-mail/Senha e Google.
+- **Dashboard Intuitivo:** Visualização rápida de estatísticas e próximos agendamentos.
+- **Gestão de Agendamentos:** Um calendário completo para marcar, visualizar e gerenciar horários.
+- **Cadastro de Clientes:** Mantenha um registro de todos os seus clientes.
+- **Gestão de Serviços:** Crie e edite os serviços oferecidos pelo estabelecimento.
+- **Painel de Administração Robusto:**
+  - **Gestão de Usuários:** Visualize todos os usuários do sistema.
+  - **Controle de Permissões:** Promova ou remova o status de administrador de qualquer usuário com um clique.
+  - **Edição de Usuários:** Altere o nome e o e-mail de exibição dos usuários.
+  - **Redefinição de Senha:** Envie e-mails de redefinição de senha diretamente do painel.
+- **Design Moderno e Responsivo:** Interface limpa e adaptável a desktops e dispositivos móveis.
 
 ---
 
-## 🚀 Guia de Início Rápido para Desenvolvedores
+## Guia de Configuração para Desenvolvedores
 
-Este guia detalha como configurar o projeto, conectá-lo ao seu próprio backend do Firebase e personalizá-lo para seus clientes.
+Siga estes passos para configurar o ambiente de desenvolvimento e conectar a aplicação ao seu próprio backend do Firebase.
 
-### Pré-requisitos
+### 1. Pré-requisitos
 
-*   [Node.js](https://nodejs.org/) (versão 18 ou superior)
-*   [npm](https://www.npmjs.com/) ou [yarn](https://yarnpkg.com/)
-*   [Git](https://git-scm.com/)
-*   Uma conta no [Google](https://google.com) para usar o Firebase.
+- **Node.js:** Versão 20.x ou superior.
+- **Conta no Firebase:** [Crie uma conta gratuita no Firebase](https://firebase.google.com/).
 
-### Passo 1: Clonar e Instalar
+### 2. Clonar e Instalar
+
+Clone o repositório para a sua máquina local e instale as dependências.
 
 ```bash
-# Clone o repositório
-git clone https://github.com/seu-usuario/by-borges-app.git
-
-# Navegue até o diretório do projeto
-cd by-borges-app
-
-# Instale as dependências
 npm install
 ```
 
-### Passo 2: Configurar o Firebase para o Cliente (Frontend)
+### 3. Configuração do Firebase
 
-O sistema usa o Firebase para banco de dados e autenticação no lado do cliente. As chaves de acesso são gerenciadas de forma segura através de variáveis de ambiente.
+Esta é a etapa mais importante. Você precisa criar um projeto no Firebase para servir como backend da sua aplicação.
 
-1.  **Crie um Projeto no Firebase:**
-    *   Acesse o [console do Firebase](https://console.firebase.google.com/).
-    *   Clique em "**Adicionar projeto**".
-    *   Dê um nome ao seu projeto (ex: `cliente-salao-app`) e siga as instruções.
+1.  **Crie um Projeto Firebase:**
+    *   Acesse o [Console do Firebase](https://console.firebase.google.com/) e clique em "Adicionar projeto".
+    *   Siga as instruções para criar um novo projeto.
 
-2.  **Ative o Firestore e o Authentication:**
-    *   No menu lateral, vá em **Construir > Firestore Database** e crie um banco de dados no **modo de produção**.
-    *   No menu lateral, vá em **Construir > Authentication** e ative o provedor de **Email/Senha**.
+2.  **Adicione a Aplicação Web:**
+    *   Dentro do seu projeto, clique no ícone de engrenagem (Configurações do Projeto) e vá para a seção "Seus apps".
+    *   Clique no ícone `</>` para adicionar um aplicativo da Web.
+    *   Dê um nome ao seu aplicativo e registre-o.
 
-3.  **Obtenha as Chaves de Configuração do Firebase:**
-    *   Nas "**Configurações do projeto**" (ícone de engrenagem), vá para a seção "**Seus apps**".
-    *   Clique no ícone da web (`</>`) para criar um novo aplicativo da web.
-    *   Registre o aplicativo e o Firebase fornecerá um objeto `firebaseConfig`. Você precisará dessas chaves.
+3.  **Obtenha as Chaves de Configuração:**
+    *   Após o registro, o Firebase fornecerá um objeto de configuração (`firebaseConfig`) com suas chaves de API. Copie este objeto.
 
-4.  **Configure o Arquivo `.env`:**
-    *   Na raiz do seu projeto, copie o arquivo `.env.example` e renomeie a cópia para `.env`.
-    *   Abra o novo arquivo `.env` e preencha com as chaves do objeto `firebaseConfig`.
+4.  **Crie o Arquivo de Conexão (`firebase.js`):
+    *   Na raiz do seu projeto React, localize o arquivo `src/firebase.js`.
+    *   Substitua o conteúdo existente pelas suas próprias chaves de configuração:
 
-    ```env
-    # Substitua pelas suas chaves reais do Firebase
-    VITE_API_KEY="SUA_API_KEY"
-    VITE_AUTH_DOMAIN="SEU_AUTH_DOMAIN"
-    VITE_PROJECT_ID="SEU_PROJECT_ID"
-    VITE_STORAGE_BUCKET="SEU_STORAGE_BUCKET"
-    VITE_MESSAGING_SENDER_ID="SEU_MESSAGING_SENDER_ID"
-    VITE_APP_ID="SUA_APP_ID"
+    ```javascript
+    // Em src/firebase.js
+    import { initializeApp } from "firebase/app";
+    import { getFirestore } from "firebase/firestore";
+    import { getAuth, GoogleAuthProvider } from "firebase/auth";
+
+    const firebaseConfig = {
+      apiKey: "SUA_API_KEY",
+      authDomain: "SEU_AUTH_DOMAIN",
+      projectId: "SEU_PROJECT_ID",
+      storageBucket: "SEU_STORAGE_BUCKET",
+      messagingSenderId: "SEU_MESSAGING_SENDER_ID",
+      appId: "SEU_APP_ID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    export const db = getFirestore(app);
+    export const auth = getAuth(app);
+    export const googleProvider = new GoogleAuthProvider();
     ```
 
-### Passo 3: Configurar o Firebase para o Servidor (Admin)
+5.  **Ative os Serviços no Firebase:**
+    *   No menu lateral do seu projeto Firebase, vá para **Authentication**:
+        *   Clique na aba "Sign-in method".
+        *   Ative os provedores **E-mail/senha** e **Google**.
+    *   Ainda no menu lateral, vá para **Firestore Database**:
+        *   Clique em "Criar banco de dados".
+        *   Inicie no **modo de produção** (production mode) para maior segurança e clique em Avançar.
+        *   Escolha um local para o seu servidor e clique em "Ativar".
 
-A funcionalidade de gerenciamento de usuários requer permissões de administrador. Isso é feito de forma segura no lado do servidor, via funções da Vercel.
+### 4. Configurando o Primeiro Administrador
 
-1.  **Crie uma Chave de Serviço (Service Account):**
-    *   No console do Firebase, vá para **Configurações do Projeto > Contas de serviço**.
-    *   Clique no botão "**Gerar nova chave privada**".
-    *   Isso fará o download de um arquivo `.json`. **Guarde este arquivo em segurança!**
+Para ter acesso ao painel de administração, você precisa definir um "Super Administrador".
 
-2.  **Configure as Variáveis de Ambiente na Vercel:**
-    *   Ao fazer o deploy do seu projeto na Vercel (ou outro provedor), você precisará adicionar as seguintes variáveis de ambiente:
-        *   `FIREBASE_PROJECT_ID`: O `project_id` do seu arquivo `.json`.
-        *   `FIREBASE_CLIENT_EMAIL`: O `client_email` do seu arquivo `.json`.
-        *   `FIREBASE_PRIVATE_KEY`: O `private_key` do seu arquivo `.json`. **Importante:** Copie e cole o valor exatamente como está, incluindo o `-----BEGIN PRIVATE KEY-----` e `-----END PRIVATE KEY-----`.
+1.  **Abra o Contexto de Autenticação:**
+    *   Navegue até `src/contexts/AuthContext.jsx`.
 
-### Passo 4: Rodar a Aplicação Localmente
+2.  **Altere o E-mail do Super Admin:**
+    *   Encontre a constante `SUPER_ADMIN_EMAIL` e altere o valor para o seu e-mail principal. Este será o primeiro e principal administrador do sistema.
+
+    ```javascript
+    // Em src/contexts/AuthContext.jsx
+    const SUPER_ADMIN_EMAIL = 'seu-email@exemplo.com'; // <-- MUDE ESTA LINHA
+    ```
+
+3.  **Faça Login pela Primeira Vez:**
+    *   Inicie a aplicação (`npm run dev`).
+    *   Cadastre-se e faça login com o e-mail que você definiu como `SUPER_ADMIN_EMAIL`.
+    *   O sistema automaticamente concederá privilégios de administrador a esta conta. A partir daí, você poderá promover outros usuários pelo painel de administração.
+
+### 5. Personalizando os E-mails (Branding do Cliente)
+
+Para que os e-mails de verificação e redefinição de senha tenham a marca do seu cliente, siga os passos:
+
+1.  No Console do Firebase, vá em **Authentication** > **Templates**.
+2.  Selecione o template que deseja editar (ex: "Redefinição de senha").
+3.  **Altere o Nome do Remetente** para o nome da barbearia do seu cliente.
+4.  **Altere o Idioma** para Português (ou o idioma local).
+5.  **Personalize o corpo do e-mail** com o nome e a mensagem do seu cliente, usando as variáveis do Firebase (ex: `%APP_NAME%`, `%LINK%`).
+
+---
+
+## Como Executar a Aplicação
+
+Após seguir o guia de configuração, inicie o servidor de desenvolvimento:
 
 ```bash
 npm run dev
 ```
-Abra seu navegador e acesse `http://localhost:5173`. A aplicação estará rodando, conectada ao seu banco de dados.
 
-### Passo 5: Promover um Usuário a Administrador (Manualmente)
+A aplicação estará disponível em `http://localhost:5173`.
 
-Como a funcionalidade de admin depende de uma configuração segura no servidor (Passo 3), pode ser mais simples e rápido promover o primeiro administrador manualmente pelo console do Firebase.
+## Estrutura do Projeto
 
-1.  **Crie uma Conta de Usuário:** Registre uma conta normalmente através da interface da sua aplicação.
-2.  **Obtenha o UID do Usuário:**
-    *   No [console do Firebase](https://console.firebase.google.com/), vá para a seção **Authentication**.
-    *   Encontre o usuário que você acabou de criar e copie o **UID** dele (uma sequência de letras e números).
-3.  **Crie um Campo `admin` no Firestore:**
-    *   Vá para o **Firestore Database**.
-    *   Crie uma coleção chamada `users` (se ainda não existir).
-    *   Crie um novo documento. O **ID do documento** deve ser **exatamente o UID** que você copiou.
-    *   Dentro desse documento, adicione um campo:
-        *   **Nome do campo:** `isAdmin`
-        *   **Tipo:** `boolean`
-        *   **Valor:** `true`
+- `src/components`: Componentes reutilizáveis (Sidebar, Modais, etc.).
+- `src/contexts`: Contextos globais da aplicação (Autenticação, Dados).
+- `src/pages`: As páginas principais da aplicação (Dashboard, Admin, etc.).
+- `src/firebase.js`: Arquivo de configuração e inicialização do Firebase.
+- `public/`: Arquivos estáticos.
 
-Pronto! O usuário com aquele UID agora é reconhecido como administrador pela aplicação e verá o link "Gerenciar Usuários" na barra lateral.
+## Licença e Monetização
 
----
-
-## 🎨 Customização e White-Labeling
-
-*   **Mudar o Tema e as Cores:** Altere as variáveis de cor em `src/index.css`.
-*   **Alterar Nomes e Logos:** Procure por "By Borges" e substitua pela marca do seu cliente.
-
-## ☁️ Implantação (Deploy)
-
-Quando a customização estiver pronta, faça o deploy em um serviço como a **Vercel** ou **Netlify**, lembrando de configurar as variáveis de ambiente do Firebase (Passo 2 e 3).
+Este projeto é distribuído sob a licença MIT. Você tem total liberdade para usar, modificar, distribuir e **vender** este software como parte de um serviço para seus clientes. Crie sua própria versão, hospede para uma barbearia local e cobre uma taxa de manutenção ou setup.
