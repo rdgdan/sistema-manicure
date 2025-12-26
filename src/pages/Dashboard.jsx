@@ -1,11 +1,83 @@
 
 import React, { useMemo, useState, useContext } from 'react';
 import { DataContext } from '../contexts/DataContext';
+import { useAuth } from '../contexts/AuthContext'; // Importar o useAuth
 import {
   BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
-import { DollarSign, Calendar, Users, TrendingUp, Filter, Loader } from 'lucide-react';
+import { DollarSign, Calendar, Users, TrendingUp, Filter, Loader, ShieldAlert, ShieldCheck } from 'lucide-react';
 import './Dashboard.css';
+
+// --- COMPONENTE DE PROMOÇÃO DE ADMIN ---
+const AdminPromotionButton = () => {
+  const { currentUser, isAdmin } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+
+  // A variável de ambiente é importada pelo Vite e fica disponível em import.meta.env
+  const pendingAdminEmail = import.meta.env.VITE_PENDING_ADMIN_EMAIL;
+
+  // Condições para mostrar o botão:
+  // 1. Deve haver um e-mail de admin pendente configurado.
+  // 2. O usuário logado deve ser o admin pendente.
+  // 3. O usuário logado NÃO PODE já ser um admin.
+  if (!pendingAdminEmail || !currentUser || currentUser.email !== pendingAdminEmail || isAdmin) {
+    return null;
+  }
+
+  const handlePromoteToAdmin = async () => {
+    setIsLoading(true);
+    setMessage('');
+    setError('');
+
+    try {
+      const response = await fetch('/api/promoteToAdmin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: currentUser.email }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Falha na comunicação com o servidor.');
+      }
+
+      setMessage('Permissão de Administrador concedida! A página será recarregada para aplicar as alterações.');
+      
+      // Recarrega a página para que o AuthContext pegue a nova permissão de admin.
+      setTimeout(() => {
+        window.location.reload();
+      }, 3500);
+
+    } catch (err) {
+      setError(err.message || 'Ocorreu um erro ao tentar ativar a permissão.');
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="admin-activation-container">
+      <div className="admin-activation-header">
+        <ShieldAlert size={24} className="alert-icon" />
+        <h3>Finalizar Configuração de Administrador</h3>
+      </div>
+      <p>Bem-vindo! Para ativar suas permissões de administrador, clique no botão abaixo. Esta ação é necessária apenas uma vez.</p>
+      
+      <button onClick={handlePromoteToAdmin} disabled={isLoading} className="admin-activation-button">
+        {isLoading ? <Loader size={18} className="spin-icon" /> : <ShieldCheck size={18} />}
+        <span>{isLoading ? 'Ativando Permissões...' : 'Ativar Modo Administrador'}</span>
+      </button>
+
+      {message && <p className="activation-message success">{message}</p>}
+      {error && <p className="activation-message error">{error}</p>}
+    </div>
+  );
+};
+
 
 const toDate = (dateSource) => {
   if (!dateSource) return null;
@@ -15,7 +87,8 @@ const toDate = (dateSource) => {
 };
 
 const Dashboard = () => {
-  const { schedules, loading } = useContext(DataContext);
+  const { schedules, loading: dataLoading } = useContext(DataContext);
+  const { loading: authLoading } = useAuth();
   const [period, setPeriod] = useState('thisMonth');
 
   // ANALYTICS DO PERÍODO PASSADO
@@ -85,12 +158,16 @@ const Dashboard = () => {
       }
   }, [schedules]);
 
-  if (loading) {
+  if (dataLoading || authLoading) {
     return <div className="loading-state-full"><Loader className="spin-icon" /> Carregando dashboard...</div>
   }
 
   return (
     <div className="dashboard-page">
+      
+      {/* Botão de promoção de Admin será renderizado aqui condicionalmente */}
+      <AdminPromotionButton />
+
       <header className="page-header">
         <div className="header-content"><h1>Dashboard</h1><p>Análise de desempenho e projeções futuras.</p></div>
         <div className="header-actions">
